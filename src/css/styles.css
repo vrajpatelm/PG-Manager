@@ -1,0 +1,228 @@
+.typing-cursor {
+  display: inline-block;
+  width: 3px;
+  background-color: #34d399;
+  margin-left: 2px;
+  animation: blink 0.7s infinite;
+}
+
+@keyframes blink {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0;
+  }
+}
+
+/* Custom Mouse Cursor */
+body {
+  cursor: none;
+}
+
+.cursor {
+  position: fixed;
+  width: 20px;
+  height: 20px;
+  border: 2px solid #34d399;
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 9999;
+  transition: all 0.15s ease;
+  transform: translate(-50%, -50%);
+}
+
+.cursor-dot {
+  position: fixed;
+  width: 6px;
+  height: 6px;
+  background-color: #34d399;
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 10000;
+  transition: all 0.1s ease;
+  transform: translate(-50%, -50%);
+}
+
+.cursor.click {
+  transform: translate(-50%, -50%) scale(0.8);
+  background-color: rgba(52, 211, 153, 0.2);
+}
+
+a:hover ~ .cursor,
+button:hover ~ .cursor {
+  transform: translate(-50%, -50%) scale(1.5);
+  background-color: rgba(52, 211, 153, 0.1);
+}
+
+/* Glowing text effect */
+.glow-text {
+  text-shadow: 0 0 20px rgba(52, 211, 153, 0.3),
+    0 0 40px rgba(52, 211, 153, 0.2);
+  animation: glow-pulse 3s ease-in-out infinite;
+}
+
+@keyframes glow-pulse {
+  0%,
+  100% {
+    text-shadow: 0 0 20px rgba(52, 211, 153, 0.3),
+      0 0 40px rgba(52, 211, 153, 0.2);
+  }
+  50% {
+    text-shadow: 0 0 30px rgba(52, 211, 153, 0.5),
+      0 0 60px rgba(52, 211, 153, 0.3);
+  }
+}
+
+/* Transparent card */
+.transparent-card {
+  background: rgba(23, 23, 23, 0.3);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(52, 211, 153, 0.15);
+}
+
+/* Gradient background */
+.gradient-bg {
+  background: radial-gradient(
+      circle at 20% 50%,
+      rgba(52, 211, 153, 0.05) 0%,
+      transparent 50%
+    ),
+    radial-gradient(
+      circle at 80% 80%,
+      rgba(52, 211, 153, 0.05) 0%,
+      transparent 50%
+    );
+}
+
+/*smooth scrolling */
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: 80px; /* Offset for fixed navbar */
+}
+
+/* Custom scrollbar  */
+::-webkit-scrollbar {
+  width: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: #000;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #34d399;
+  border-radius: 5px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #10b981;
+}
+
+/* Smooth transitions for all elements */
+* {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Add momentum scrolling for mobile */
+body {
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Floating particles - SINGLE DEFINITION */
+.particle {
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  background-color: #34d399;
+  border-radius: 50%;
+  opacity: 0;
+  animation: float-up 8s ease-in infinite;
+  box-shadow: 0 0 10px #34d399;
+}
+
+@keyframes float-up {
+  0% {
+    opacity: 0;
+    transform: translateY(0) translateX(0);
+  }
+  10% {
+    opacity: 0.8;
+  }
+  90% {
+    opacity: 0.3;
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-100vh) translateX(50px);
+  }
+}
+
+/* Particle containers */
+#particles-container,
+#particles-container-features,
+#particles-container-about,
+#particles-container-cta {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* Feature card animations */
+.feature-card {
+  opacity: 0;
+  transform: translateY(50px);
+  animation: fadeInUp 0.6s ease forwards;
+}
+
+@keyframes fadeInUp {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.feature-card:nth-child(1) {
+  animation-delay: 0.1s;
+}
+.feature-card:nth-child(2) {
+  animation-delay: 0.2s;
+}
+.feature-card:nth-child(3) {
+  animation-delay: 0.3s;
+}
+.feature-card:nth-child(4) {
+  animation-delay: 0.4s;
+}
+.feature-card:nth-child(5) {
+  animation-delay: 0.5s;
+}
+.feature-card:nth-child(6) {
+  animation-delay: 0.6s;
+}
+
+/* Icon float animation */
+.icon-float {
+  animation: float-icon 3s ease-in-out infinite;
+}
+
+@keyframes float-icon {
+  0%,
+  100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+/* Smooth scroll */
+html {
+  scroll-behavior: smooth;
+}

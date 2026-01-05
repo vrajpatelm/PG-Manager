@@ -1,14 +1,201 @@
-<!doctype html>
+<!DOCTYPE html>
 <html>
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<link rel="stylesheet" href="../../css/output.css">
-</head>
-<body>
-  <h1 class="text-4xl font-bold text-red-500">
-  Tailwind is working 🚀
-</h1>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>PGManager - Smart PG Management</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="../../css/styles.css" />
+  </head>
+  <body class="bg-black text-white">
+    <!-- Custom Cursor -->
+    <div class="cursor"></div>
+    <div class="cursor-dot"></div>
 
-</body>
+    <!-- NAVBAR -->
+    <nav class="fixed top-0 w-full z-50 backdrop-blur bg-black/60 border-b border-neutral-800">
+      <div class="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
+        <h1 class="text-xl font-bold">
+          PG<span class="text-emerald-400">Manager</span>
+        </h1>
+
+        <ul class="hidden md:flex gap-8 text-gray-400">
+          <li class="hover:text-emerald-400 cursor-pointer transition">Home</li>
+          <li class="hover:text-emerald-400 cursor-pointer transition">Features</li>
+          <li class="hover:text-emerald-400 cursor-pointer transition">How It Works</li>
+          <li class="hover:text-emerald-400 cursor-pointer transition">Reviews</li>
+          <li class="hover:text-emerald-400 cursor-pointer transition">Contact</li>
+        </ul>
+
+        <div class="flex gap-3">
+          <button class="px-4 py-2 border border-neutral-700 rounded-lg hover:bg-neutral-800 transition">
+            Login
+          </button>
+          <button class="px-4 py-2 bg-emerald-400 text-black rounded-lg hover:bg-emerald-300 transition">
+            Get Started
+          </button>
+        </div>
+      </div>
+    </nav>
+
+    <!-- HERO SECTION -->
+    <section class="min-h-screen flex items-center justify-center bg-black text-white relative overflow-hidden">
+      <div id="particles-container"></div>
+
+      <div class="max-w-4xl mx-auto text-center px-6 relative z-10 pt-20">
+        <h1 class="text-4xl md:text-6xl font-bold leading-tight">
+          Smart PG Management <br />
+          <span class="text-emerald-400 glow-text" id="typing-text"></span><span class="typing-cursor"></span>
+        </h1>
+
+        <p class="mt-6 text-gray-400 text-lg md:text-xl max-w-2xl mx-auto">
+          Transform your paying guest operations with our intelligent management
+          platform. Streamline bookings, payments, and tenant management all in one place.
+        </p>
+
+        <div class="mt-10 flex justify-center gap-4 flex-wrap">
+          <a href="#" class="bg-emerald-400 text-black px-6 py-3 rounded-lg font-semibold hover:bg-emerald-300 transition duration-300 inline-flex items-center gap-2 hover:scale-105 transform">
+            Get Started →
+          </a>
+          <a href="#" class="bg-neutral-900 border border-neutral-700 px-6 py-3 rounded-lg hover:bg-neutral-800 transition duration-300 hover:scale-105 transform hover:border-emerald-400">
+            View Demo
+          </a>
+        </div>
+      </div>
+
+      <div class="absolute bottom-10 animate-bounce text-emerald-400 text-2xl">⌄</div>
+    </section>
+
+    <!-- FEATURES SECTION -->
+    <section class="min-h-screen flex items-center justify-center bg-black text-white relative overflow-hidden py-20 gradient-bg">
+      <div id="particles-container-features"></div>
+
+      <div class="max-w-7xl mx-auto px-6 relative z-10">
+        <div class="text-center mb-16">
+          <h2 class="text-4xl md:text-6xl font-bold leading-tight mb-4">
+            Key <span class="text-emerald-400 glow-text">Features</span>
+          </h2>
+          <p class="text-gray-400 text-lg md:text-xl max-w-2xl mx-auto">
+            Everything you need to manage your PG operations efficiently and effectively
+          </p>
+        </div>
+
+        <div class="grid md:grid-cols-3 gap-8">
+          <div class="feature-card transparent-card p-8 rounded-2xl hover:scale-105 transition-all duration-300 hover:border-emerald-400 hover:shadow-lg hover:shadow-emerald-400/20 group">
+            <div class="text-5xl mb-4 icon-float">👥</div>
+            <h3 class="text-xl font-semibold text-emerald-400 mb-3 group-hover:glow-text transition">Tenant Management</h3>
+            <p class="text-gray-400">Add, update, and track tenants with room allocation and rent details seamlessly.</p>
+          </div>
+
+          <div class="feature-card transparent-card p-8 rounded-2xl hover:scale-105 transition-all duration-300 hover:border-emerald-400 hover:shadow-lg hover:shadow-emerald-400/20 group">
+            <div class="text-5xl mb-4 icon-float" style="animation-delay: 0.5s;">🏠</div>
+            <h3 class="text-xl font-semibold text-emerald-400 mb-3 group-hover:glow-text transition">Room Tracking</h3>
+            <p class="text-gray-400">Monitor room availability, occupancy, and pricing in real time with live updates.</p>
+          </div>
+
+          <div class="feature-card transparent-card p-8 rounded-2xl hover:scale-105 transition-all duration-300 hover:border-emerald-400 hover:shadow-lg hover:shadow-emerald-400/20 group">
+            <div class="text-5xl mb-4 icon-float" style="animation-delay: 1s;">💳</div>
+            <h3 class="text-xl font-semibold text-emerald-400 mb-3 group-hover:glow-text transition">Secure Payments</h3>
+            <p class="text-gray-400">Track rent payments, pending dues, and payment history with bank-level security.</p>
+          </div>
+
+          <div class="feature-card transparent-card p-8 rounded-2xl hover:scale-105 transition-all duration-300 hover:border-emerald-400 hover:shadow-lg hover:shadow-emerald-400/20 group">
+            <div class="text-5xl mb-4 icon-float" style="animation-delay: 1.5s;">🔐</div>
+            <h3 class="text-xl font-semibold text-emerald-400 mb-3 group-hover:glow-text transition">Role Based Access</h3>
+            <p class="text-gray-400">Owner and Manager roles with controlled access to features and sensitive data.</p>
+          </div>
+
+          <div class="feature-card transparent-card p-8 rounded-2xl hover:scale-105 transition-all duration-300 hover:border-emerald-400 hover:shadow-lg hover:shadow-emerald-400/20 group">
+            <div class="text-5xl mb-4 icon-float" style="animation-delay: 2s;">⚡</div>
+            <h3 class="text-xl font-semibold text-emerald-400 mb-3 group-hover:glow-text transition">Fast & Scalable</h3>
+            <p class="text-gray-400">Built with modern technologies for lightning-fast performance and reliability.</p>
+          </div>
+
+          <div class="feature-card transparent-card p-8 rounded-2xl hover:scale-105 transition-all duration-300 hover:border-emerald-400 hover:shadow-lg hover:shadow-emerald-400/20 group">
+            <div class="text-5xl mb-4 icon-float" style="animation-delay: 2.5s;">🛡️</div>
+            <h3 class="text-xl font-semibold text-emerald-400 mb-3 group-hover:glow-text transition">Secure Authentication</h3>
+            <p class="text-gray-400">JWT-based login with optional OTP verification for maximum security.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="absolute bottom-10 animate-bounce text-emerald-400 text-2xl">⌄</div>
+    </section>
+
+    <!-- ABOUT SECTION -->
+    <section class="min-h-screen flex items-center justify-center bg-black relative overflow-hidden py-20">
+      <div class="absolute inset-0 gradient-bg opacity-50"></div>
+      <div id="particles-container-about"></div>
+
+      <div class="max-w-4xl mx-auto px-6 text-center relative z-10">
+        <h2 class="text-4xl md:text-5xl font-bold text-white mb-8">
+          Why <span class="text-emerald-400 glow-text">PGManager</span>?
+        </h2>
+
+        <div class="transparent-card p-12 rounded-2xl">
+          <p class="text-gray-300 text-lg md:text-xl leading-relaxed mb-8">
+            Managing a PG should be simple, transparent, and stress-free.
+            PGManager digitizes daily PG operations so owners can focus on growth,
+            and tenants enjoy a better living experience.
+          </p>
+
+          <div class="grid md:grid-cols-3 gap-8 mt-12">
+            <div class="text-center">
+              <div class="text-5xl font-bold text-emerald-400 mb-2">500+</div>
+              <div class="text-gray-400">Active PGs</div>
+            </div>
+            <div class="text-center">
+              <div class="text-5xl font-bold text-emerald-400 mb-2">10K+</div>
+              <div class="text-gray-400">Happy Tenants</div>
+            </div>
+            <div class="text-center">
+              <div class="text-5xl font-bold text-emerald-400 mb-2">99.9%</div>
+              <div class="text-gray-400">Uptime</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- CTA SECTION -->
+    <section class="min-h-screen flex items-center justify-center bg-black relative overflow-hidden">
+      <div class="absolute inset-0 gradient-bg"></div>
+      <div id="particles-container-cta"></div>
+
+      <div class="text-center relative z-10 px-6">
+        <h2 class="text-4xl md:text-6xl font-bold text-white mb-6">
+          Ready to Manage Your PG <br />
+          <span class="text-emerald-400 glow-text">Smarter?</span>
+        </h2>
+        <p class="text-gray-400 text-lg mb-10 max-w-2xl mx-auto">
+          Join hundreds of PG owners who have transformed their operations with our platform
+        </p>
+        <a href="#" class="px-10 py-4 bg-emerald-400 text-black text-lg font-semibold rounded-lg hover:bg-emerald-300 inline-block hover:scale-110 transition transform shadow-lg shadow-emerald-400/50">
+          Start Now - It's Free
+        </a>
+      </div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer class="bg-black border-t border-neutral-800 py-8 relative">
+      <div class="max-w-7xl mx-auto px-6">
+        <div class="flex flex-col md:flex-row justify-between items-center gap-4">
+          <div class="text-center md:text-left">
+            <h3 class="text-xl font-bold mb-2">
+              PG<span class="text-emerald-400">Manager</span>
+            </h3>
+            <p class="text-gray-500">© 2026 PGManager. All rights reserved.</p>
+          </div>
+
+          <div class="flex gap-6 text-gray-400">
+            <a href="#" class="hover:text-emerald-400 transition">Privacy</a>
+            <a href="#" class="hover:text-emerald-400 transition">Terms</a>
+            <a href="#" class="hover:text-emerald-400 transition">Contact</a>
+          </div>
+        </div>
+      </div>
+    </footer>
+
+    <script src="../../js/common/typing.js"></script>
+  </body>
 </html>
