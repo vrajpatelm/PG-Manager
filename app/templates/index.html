@@ -7,11 +7,66 @@
   <link rel="stylesheet" href="/static/css/tailwind.css">
 </head>
 <body class="bg-gray-100 text-gray-900">
-  <main class="max-w-3xl mx-auto p-6">
-    <h1 class="text-3xl font-bold mb-4">PG-Manager</h1>
-    <p class="mb-4">This is a minimal Tailwind + Flask example.</p>
-    <a class="btn" href="#">A Tailwind Button</a>
-    <h1 class="bg-blue-500 text-white p-2 rounded">Heloo</h1>
-  </main>
+  <header class="pb-6 bg-white lg:pb-0">
+    <div class="px-4 mx-auto max-w-7xl sm:px-6 lg:px-8">
+        <!-- lg+ -->
+        <nav class="flex items-center justify-between h-16 lg:h-20">
+            <div class="flex-shrink-0">
+                <a href="#" title="" class="flex">
+                    <img class="w-auto h-8 lg:h-10" src="https://cdn.rareblocks.xyz/collection/celebration/images/logo.svg" alt="" />
+                </a>
+            </div>
+
+            <button id="btn-mobile-toggle" type="button" class="inline-flex p-2 text-black transition-all duration-200 rounded-md lg:hidden focus:bg-gray-100 hover:bg-gray-100">
+                <!-- Menu open: "hidden", Menu closed: "block" -->
+                <svg id="icon-open" class="block w-6 h-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8h16M4 16h16" />
+                </svg>
+
+                <!-- Menu open: "block", Menu closed: "hidden" -->
+                <svg id="icon-close" class="hidden w-6 h-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+            </button>
+            <div class="hidden lg:flex items-center justify-center flex-1 lg:space-x-10">
+                <a href="#" title="" class="text-base font-medium text-black transition-all duration-200 hover:text-blue-600 focus:text-blue-600"> Home </a>
+
+                <a href="#" title="" class="text-base font-medium text-black transition-all duration-200 hover:text-blue-600 focus:text-blue-600"> Features </a>
+
+                <a href="#" title="" class="text-base font-medium text-black transition-all duration-200 hover:text-blue-600 focus:text-blue-600"> How it works </a>
+
+                <a href="#" title="" class="text-base font-medium text-black transition-all duration-200 hover:text-blue-600 focus:text-blue-600"> About </a>
+                <a href="#" title="" class="text-base font-medium text-black transition-all duration-200 hover:text-blue-600 focus:text-blue-600"> Contact </a>
+            </div>
+
+            <div class="hidden lg:flex items-center space-x-3">
+                <a id="btn-login-desktop" href="#" title="Log in" class="px-4 py-2 text-sm font-medium text-black transition-all duration-200 rounded-md border border-gray-200 hover:bg-gray-50 focus:bg-gray-50">Log in</a>
+                <a id="btn-signup-desktop" href="#" title="Sign up" class="px-5 py-2 text-sm font-semibold text-white transition-all duration-200 bg-blue-600 rounded-md hover:bg-blue-700 focus:bg-blue-700">Sign up</a>
+            </div>
+        </nav>
+
+        <!-- xs to lg -->
+        <nav id="mobile-menu" class="hidden pt-4 pb-6 bg-white border border-gray-200 rounded-md shadow-md lg:hidden">
+            <div class="flow-root">
+                <div class="flex flex-col px-6 -my-2 space-y-1">
+                    <a href="#" title="" class="inline-flex py-2 text-base font-medium text-black transition-all duration-200 hover:text-blue-600 focus:text-blue-600"> Features </a>
+
+                    <a href="#" title="" class="inline-flex py-2 text-base font-medium text-black transition-all duration-200 hover:text-blue-600 focus:text-blue-600"> Solutions </a>
+
+                    <a href="#" title="" class="inline-flex py-2 text-base font-medium text-black transition-all duration-200 hover:text-blue-600 focus:text-blue-600"> Resources </a>
+
+                    <a href="#" title="" class="inline-flex py-2 text-base font-medium text-black transition-all duration-200 hover:text-blue-600 focus:text-blue-600"> Pricing </a>
+                </div>
+            </div>
+
+            <div class="px-6 mt-6 flex items-center space-x-3">
+                <a id="btn-login-mobile" href="#" title="Log in" class="inline-flex justify-center px-4 py-3 text-base font-medium text-black transition-all duration-200 rounded-md border border-gray-200 hover:bg-gray-50 focus:bg-gray-50" role="button">Log in</a>
+                <a id="btn-signup-mobile" href="#" title="Sign up" class="inline-flex justify-center px-4 py-3 text-base font-semibold text-white transition-all duration-200 bg-blue-600 rounded-md hover:bg-blue-700 focus:bg-blue-700" role="button">Sign up</a>
+            </div>
+        </nav>
+    </div>
+</header>
+
+<script src="/static/js/main.js"></script>
 </body>
 </html>
