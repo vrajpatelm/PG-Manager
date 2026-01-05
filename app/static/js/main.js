@@ -62,16 +62,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Wire events
   if (els.loginDesktop) {
-    els.loginDesktop.addEventListener('click', (e) => { e.preventDefault(); setActive(true); });
+    els.loginDesktop.addEventListener('click', (e) => { setActive(true); });
   }
   if (els.signupDesktop) {
-    els.signupDesktop.addEventListener('click', (e) => { e.preventDefault(); setActive(false); });
+    els.signupDesktop.addEventListener('click', (e) => { setActive(false); });
   }
   if (els.loginMobile) {
-    els.loginMobile.addEventListener('click', (e) => { e.preventDefault(); setActive(true); });
+    els.loginMobile.addEventListener('click', (e) => { setActive(true); });
   }
   if (els.signupMobile) {
-    els.signupMobile.addEventListener('click', (e) => { e.preventDefault(); setActive(false); });
+    els.signupMobile.addEventListener('click', (e) => { setActive(false); });
   }
 
   // Mobile hamburger toggle

@@ -9,9 +9,10 @@
 <body class="bg-gray-100 text-gray-900">
   <header class="pb-6 bg-white lg:pb-0">
     <div class="px-4 mx-auto max-w-7xl sm:px-6 lg:px-8">
+      
         <!-- lg+ -->
         <nav class="flex items-center justify-between h-16 lg:h-20">
-            <div class="flex-shrink-0">
+            <div class="shrink-0">
                 <a href="#" title="" class="flex">
                     <img class="w-auto h-8 lg:h-10" src="https://cdn.rareblocks.xyz/collection/celebration/images/logo.svg" alt="" />
                 </a>
@@ -40,8 +41,8 @@
             </div>
 
             <div class="hidden lg:flex items-center space-x-3">
-                <a id="btn-login-desktop" href="#" title="Log in" class="px-4 py-2 text-sm font-medium text-black transition-all duration-200 rounded-md border border-gray-200 hover:bg-gray-50 focus:bg-gray-50">Log in</a>
-                <a id="btn-signup-desktop" href="#" title="Sign up" class="px-5 py-2 text-sm font-semibold text-white transition-all duration-200 bg-blue-600 rounded-md hover:bg-blue-700 focus:bg-blue-700">Sign up</a>
+                <a id="btn-login-desktop" href="{{ url_for('main.login') }}" title="Log in" class="px-4 py-2 text-sm font-medium text-black transition-all duration-200 rounded-md border border-gray-200 hover:bg-gray-50 focus:bg-gray-50">Log in</a>
+                <a id="btn-signup-desktop" href="{{ url_for('main.signup') }}" title="Sign up" class="px-5 py-2 text-sm font-semibold text-white transition-all duration-200 bg-blue-600 rounded-md hover:bg-blue-700 focus:bg-blue-700">Sign up</a>
             </div>
         </nav>
 
@@ -60,8 +61,8 @@
             </div>
 
             <div class="px-6 mt-6 flex items-center space-x-3">
-                <a id="btn-login-mobile" href="#" title="Log in" class="inline-flex justify-center px-4 py-3 text-base font-medium text-black transition-all duration-200 rounded-md border border-gray-200 hover:bg-gray-50 focus:bg-gray-50" role="button">Log in</a>
-                <a id="btn-signup-mobile" href="#" title="Sign up" class="inline-flex justify-center px-4 py-3 text-base font-semibold text-white transition-all duration-200 bg-blue-600 rounded-md hover:bg-blue-700 focus:bg-blue-700" role="button">Sign up</a>
+                <a id="btn-login-mobile" href="{{ url_for('main.login') }}" title="Log in" class="inline-flex justify-center px-4 py-3 text-base font-medium text-black transition-all duration-200 rounded-md border border-gray-200 hover:bg-gray-50 focus:bg-gray-50" role="button">Log in</a>
+                <a id="btn-signup-mobile" href="{{ url_for('main.signup') }}" title="Sign up" class="inline-flex justify-center px-4 py-3 text-base font-semibold text-white transition-all duration-200 bg-blue-600 rounded-md hover:bg-blue-700 focus:bg-blue-700" role="button">Sign up</a>
             </div>
         </nav>
     </div>
