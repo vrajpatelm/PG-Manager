@@ -340,173 +340,367 @@
     </section>
 
     <!-- How It Works -->
-    <section id="how-it-works" class="py-20 bg-gray-50">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <!-- How It Works Section -->
+    <!-- How It Works Section -->
+    <section id="how-it-works" class="py-24 bg-white relative overflow-hidden">
+      <!-- Background Decorations -->
+      <div class="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
+        <div class="absolute top-[10%] left-[-5%] w-96 h-96 bg-brand1/5 rounded-full blur-3xl"></div>
+        <div class="absolute bottom-[10%] right-[-5%] w-96 h-96 bg-nav-900/5 rounded-full blur-3xl"></div>
+      </div>
+
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         <div class="text-center mb-16">
-          <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-            How It Works
+          <span class="text-brand1 font-bold tracking-wider uppercase text-sm">Simple Process</span>
+          <h2 class="text-4xl md:text-5xl font-bold text-slate-900 mt-2 mb-6">
+            Get started in <span class="text-transparent bg-clip-text bg-gradient-to-r from-[#D61C4E] to-[#FEB139]">minutes</span>
           </h2>
-          <div class="flex justify-center gap-4 mb-8">
-            <button
-              class="bg-white px-6 py-2 rounded-full shadow-sm text-nav font-semibold border border-transparent"
-            >
-              For Owners
-            </button>
-            <button
-              class="text-gray-500 px-6 py-2 font-medium hover:text-gray-700"
-            >
-              For Tenants
-            </button>
+          <p class="text-xl text-slate-600 max-w-2xl mx-auto mb-10">
+            We've streamlined everything so you can focus on what matters most.
+          </p>
+          
+          <!-- Process Toggler -->
+          <div class="inline-flex bg-slate-100 p-1 rounded-full shadow-inner relative z-20">
+             <button onclick="switchProcess('owners')" id="btn-owners" class="px-8 py-3 rounded-full text-sm font-bold transition-all duration-300 bg-white text-slate-900 shadow-sm">
+                For Owners
+             </button>
+             <button onclick="switchProcess('tenants')" id="btn-tenants" class="px-8 py-3 rounded-full text-sm font-bold text-slate-500 hover:text-slate-900 transition-all duration-300">
+                For Tenants
+             </button>
           </div>
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-8 text-center relative">
-          <!-- Connecting Line (Desktop) -->
-          <div
-            class="hidden md:block absolute top-12 left-[16%] right-[16%] h-0.5 bg-gray-200 -z-10"
-          ></div>
+        <!-- Owners Process -->
+        <div id="process-owners" class="space-y-24 transition-opacity duration-500">
+          <!-- Step 1 -->
+          <div class="flex flex-col md:flex-row items-center gap-12 lg:gap-20">
+            <div class="w-full md:w-1/2">
+              <div class="relative group">
+                <div class="absolute inset-0 bg-brand1/5 rounded-3xl transform rotate-3 transition-transform duration-300 group-hover:rotate-6"></div>
+                <div class="relative bg-white border border-gray-100 p-2 rounded-3xl shadow-xl overflow-hidden aspect-video flex items-center justify-center">
+                   <!-- Abstract Illustration: Registration -->
+                   <svg class="w-full h-full text-slate-900" viewBox="0 0 400 300" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <rect x="50" y="50" width="300" height="200" rx="10" fill="#F8FAFC" stroke="#E2E8F0" stroke-width="2"/>
+                      <circle cx="130" cy="150" r="40" fill="#D61C4E" fill-opacity="0.1"/>
+                      <path d="M130 140C135 140 139 136 139 131C139 126 135 122 130 122C125 122 121 126 121 131C121 136 125 140 130 140Z" fill="#D61C4E"/>
+                      <path d="M110 162C110 155 120 150 130 150C140 150 150 155 150 162V166H110V162Z" fill="#D61C4E"/>
+                      <rect x="190" y="100" width="120" height="10" rx="5" fill="#E2E8F0"/>
+                      <rect x="190" y="130" width="100" height="10" rx="5" fill="#E2E8F0"/>
+                      <rect x="190" y="160" width="80" height="10" rx="5" fill="#E2E8F0"/>
+                      <circle cx="330" cy="70" r="20" fill="#FEB139" fill-opacity="0.2"/>
+                   </svg>
+                </div>
+              </div>
+            </div>
+            <div class="w-full md:w-1/2">
+              <div class="flex items-center gap-4 mb-4">
+                <span class="flex items-center justify-center w-12 h-12 rounded-full bg-red-100 text-red-600 font-bold text-lg">01</span>
+                <h3 class="text-2xl font-bold text-slate-900">Create Owner Account</h3>
+              </div>
+              <p class="text-lg text-slate-600 leading-relaxed mb-6">
+                Sign up as a Property Owner in seconds. Our guided onboarding ensures you get the right dashboard for managing your properties.
+              </p>
+              <ul class="space-y-3">
+                <li class="flex items-center gap-3 text-slate-700">
+                  <svg class="w-5 h-5 text-brand1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                  <span>Verify your identity simply</span>
+                </li>
+                 <li class="flex items-center gap-3 text-slate-700">
+                  <svg class="w-5 h-5 text-brand1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                  <span>Customize your dashboard</span>
+                </li>
+              </ul>
+            </div>
+          </div>
 
-          <div class="relative group">
-            <div
-              class="w-24 h-24 mx-auto bg-white rounded-2xl shadow-lg flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300"
-            >
-              <span class="text-4xl">📝</span>
+          <!-- Step 2 -->
+          <div class="flex flex-col md:flex-row-reverse items-center gap-12 lg:gap-20">
+            <div class="w-full md:w-1/2">
+              <div class="relative group">
+                <div class="absolute inset-0 bg-nav-900/5 rounded-3xl transform -rotate-3 transition-transform duration-300 group-hover:-rotate-6"></div>
+                <div class="relative bg-white border border-gray-100 p-2 rounded-3xl shadow-xl overflow-hidden aspect-video flex items-center justify-center">
+                    <!-- Abstract Illustration: Inventory -->
+                   <svg class="w-full h-full" viewBox="0 0 400 300" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <rect x="80" y="60" width="240" height="180" rx="4" fill="#F8FAFC" stroke="#E2E8F0" stroke-width="2"/>
+                      <rect x="100" y="100" width="80" height="60" rx="2" fill="#293462" fill-opacity="0.1"/>
+                      <rect x="100" y="180" width="80" height="40" rx="2" fill="#293462" fill-opacity="0.05"/>
+                      <rect x="220" y="100" width="80" height="60" rx="2" fill="#293462" fill-opacity="0.1"/>
+                      <rect x="220" y="180" width="80" height="40" rx="2" fill="#293462" fill-opacity="0.05"/>
+                      <path d="M140 130L150 120H130L140 130Z" fill="#293462"/>
+                      <circle cx="360" cy="250" r="30" fill="#FEB139" fill-opacity="0.1"/>
+                   </svg>
+                </div>
+              </div>
             </div>
-            <h3 class="text-xl font-bold mb-2">1. Register</h3>
-            <p class="text-gray-600">
-              Create your account and list your property details.
-            </p>
+            <div class="w-full md:w-1/2">
+              <div class="flex items-center gap-4 mb-4">
+                <span class="flex items-center justify-center w-12 h-12 rounded-full bg-yellow-100 text-yellow-600 font-bold text-lg">02</span>
+                <h3 class="text-2xl font-bold text-slate-900">Manage Property</h3>
+              </div>
+              <p class="text-lg text-slate-600 leading-relaxed mb-6">
+                Add your buildings, floors, and rooms with ease. Set amenities, pricing, and occupancy rules to keep your inventory organized.
+              </p>
+               <ul class="space-y-3">
+                <li class="flex items-center gap-3 text-slate-700">
+                  <svg class="w-5 h-5 text-brand2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                  <span>Bulk room uploads</span>
+                </li>
+                 <li class="flex items-center gap-3 text-slate-700">
+                  <svg class="w-5 h-5 text-brand2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                  <span>Smart categorization</span>
+                </li>
+              </ul>
+            </div>
           </div>
-          <div class="relative group">
-            <div
-              class="w-24 h-24 mx-auto bg-white rounded-2xl shadow-lg flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300"
-            >
-              <span class="text-4xl">🛌</span>
+
+          <!-- Step 3 -->
+           <div class="flex flex-col md:flex-row items-center gap-12 lg:gap-20">
+            <div class="w-full md:w-1/2">
+              <div class="relative group">
+                <div class="absolute inset-0 bg-green-50 rounded-3xl transform rotate-3 transition-transform duration-300 group-hover:rotate-6"></div>
+                <div class="relative bg-white border border-gray-100 p-2 rounded-3xl shadow-xl overflow-hidden aspect-video flex items-center justify-center">
+                    <!-- Abstract Illustration: Go Live -->
+                   <svg class="w-full h-full" viewBox="0 0 400 300" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M100 220L150 170L200 200L300 100" stroke="#10B981" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+                      <circle cx="300" cy="100" r="10" fill="#10B981"/>
+                      <rect x="50" y="50" width="300" height="200" rx="10" stroke="#E2E8F0" stroke-width="2" stroke-dasharray="8 8"/>
+                       <circle cx="80" cy="250" r="20" fill="#10B981" fill-opacity="0.1"/>
+                       <path d="M280 120H320V80" stroke="#10B981" stroke-width="2"/>
+                   </svg>
+                </div>
+              </div>
             </div>
-            <h3 class="text-xl font-bold mb-2">2. Add Rooms</h3>
-            <p class="text-gray-600">
-              Setup room types, beds, and amenities available.
-            </p>
-          </div>
-          <div class="relative group">
-            <div
-              class="w-24 h-24 mx-auto bg-white rounded-2xl shadow-lg flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300"
-            >
-              <span class="text-4xl">🚀</span>
+            <div class="w-full md:w-1/2">
+              <div class="flex items-center gap-4 mb-4">
+                <span class="flex items-center justify-center w-12 h-12 rounded-full bg-green-100 text-green-600 font-bold text-lg">03</span>
+                <h3 class="text-2xl font-bold text-slate-900">Go Live & Earn</h3>
+              </div>
+              <p class="text-lg text-slate-600 leading-relaxed mb-6">
+                Publish your property and start accepting digital rent payments. Tenant management becomes automated and hassle-free.
+              </p>
+               <ul class="space-y-3">
+                <li class="flex items-center gap-3 text-slate-700">
+                  <svg class="w-5 h-5 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                  <span>Automated rent reminders</span>
+                </li>
+                 <li class="flex items-center gap-3 text-slate-700">
+                  <svg class="w-5 h-5 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                  <span>Instant bank transfers</span>
+                </li>
+              </ul>
             </div>
-            <h3 class="text-xl font-bold mb-2">3. Go Live</h3>
-            <p class="text-gray-600">
-              Start accepting bookings and managing tenants.
-            </p>
           </div>
         </div>
+
+        <!-- Tenants Process (Hidden by Default) -->
+        <div id="process-tenants" class="hidden space-y-24 transition-opacity duration-500">
+             <!-- Step 1 -->
+          <div class="flex flex-col md:flex-row items-center gap-12 lg:gap-20">
+            <div class="w-full md:w-1/2">
+              <div class="relative group">
+                <div class="absolute inset-0 bg-brand1/5 rounded-3xl transform rotate-3 transition-transform duration-300 group-hover:rotate-6"></div>
+                <div class="relative bg-white border border-gray-100 p-2 rounded-3xl shadow-xl overflow-hidden aspect-video flex items-center justify-center">
+                   <!-- Abstract Illustration: Search -->
+                   <svg class="w-full h-full" viewBox="0 0 400 300" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <circle cx="200" cy="150" r="80" stroke="#D61C4E" stroke-width="2"/>
+                      <path d="M260 210L300 250" stroke="#D61C4E" stroke-width="8" stroke-linecap="round"/>
+                      <rect x="150" y="120" width="100" height="60" rx="4" fill="#F8FAFC" stroke="#94A3B8" stroke-width="2"/>
+                      <circle cx="170" cy="140" r="5" fill="#D61C4E"/>
+                      <rect x="180" y="135" width="50" height="10" rx="5" fill="#E2E8F0"/>
+                   </svg>
+                </div>
+              </div>
+            </div>
+            <div class="w-full md:w-1/2">
+              <div class="flex items-center gap-4 mb-4">
+                <span class="flex items-center justify-center w-12 h-12 rounded-full bg-red-100 text-red-600 font-bold text-lg">01</span>
+                <h3 class="text-2xl font-bold text-slate-900">Find Perfect Stay</h3>
+              </div>
+              <p class="text-lg text-slate-600 leading-relaxed mb-6">
+                Browse thousands of verified PGs based on location, budget, and amenities. Use smart filters to shortlist your favorites.
+              </p>
+              <ul class="space-y-3">
+                <li class="flex items-center gap-3 text-slate-700">
+                  <svg class="w-5 h-5 text-brand1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                  <span>Interactive map search</span>
+                </li>
+                 <li class="flex items-center gap-3 text-slate-700">
+                  <svg class="w-5 h-5 text-brand1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                  <span>Verified photos & reviews</span>
+                </li>
+              </ul>
+            </div>
+          </div>
+
+           <!-- Step 2 -->
+          <div class="flex flex-col md:flex-row-reverse items-center gap-12 lg:gap-20">
+            <div class="w-full md:w-1/2">
+              <div class="relative group">
+                <div class="absolute inset-0 bg-brand2/10 rounded-3xl transform -rotate-3 transition-transform duration-300 group-hover:-rotate-6"></div>
+                <div class="relative bg-white border border-gray-100 p-2 rounded-3xl shadow-xl overflow-hidden aspect-video flex items-center justify-center">
+                    <!-- Abstract Illustration: Booking -->
+                   <svg class="w-full h-full" viewBox="0 0 400 300" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <rect x="100" y="60" width="200" height="180" rx="10" fill="#fff" stroke="#FEB139" stroke-width="2"/>
+                      <path d="M100 100H300" stroke="#FEB139" stroke-width="2"/>
+                      <circle cx="200" cy="160" r="30" fill="#FEB139" fill-opacity="0.2"/>
+                      <path d="M190 160L200 170L220 150" stroke="#FEB139" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+                      <rect x="140" y="200" width="120" height="10" rx="5" fill="#E2E8F0"/>
+                   </svg>
+                </div>
+              </div>
+            </div>
+            <div class="w-full md:w-1/2">
+              <div class="flex items-center gap-4 mb-4">
+                <span class="flex items-center justify-center w-12 h-12 rounded-full bg-yellow-100 text-yellow-600 font-bold text-lg">02</span>
+                <h3 class="text-2xl font-bold text-slate-900">Book Instantly</h3>
+              </div>
+              <p class="text-lg text-slate-600 leading-relaxed mb-6">
+                Book your bed or room instantly with secure digital payments. No hidden brokerage or paperwork hassles.
+              </p>
+               <ul class="space-y-3">
+                <li class="flex items-center gap-3 text-slate-700">
+                  <svg class="w-5 h-5 text-brand2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                  <span>Instant confirmation</span>
+                </li>
+                 <li class="flex items-center gap-3 text-slate-700">
+                  <svg class="w-5 h-5 text-brand2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                  <span>Zero brokerage</span>
+                </li>
+              </ul>
+            </div>
+          </div>
+
+           <!-- Step 3 -->
+           <div class="flex flex-col md:flex-row items-center gap-12 lg:gap-20">
+            <div class="w-full md:w-1/2">
+              <div class="relative group">
+                <div class="absolute inset-0 bg-green-50 rounded-3xl transform rotate-3 transition-transform duration-300 group-hover:rotate-6"></div>
+                <div class="relative bg-white border border-gray-100 p-2 rounded-3xl shadow-xl overflow-hidden aspect-video flex items-center justify-center">
+                    <!-- Abstract Illustration: Relax -->
+                   <svg class="w-full h-full" viewBox="0 0 400 300" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M50 250C100 250 150 220 200 220C250 220 300 250 350 250" stroke="#10B981" stroke-width="2"/>
+                       <circle cx="200" cy="150" r="50" fill="#10B981" fill-opacity="0.1"/>
+                       <path d="M180 150C180 150 190 160 200 160C210 160 220 150 220 150" stroke="#10B981" stroke-width="2" stroke-linecap="round"/>
+                   </svg>
+                </div>
+              </div>
+            </div>
+            <div class="w-full md:w-1/2">
+              <div class="flex items-center gap-4 mb-4">
+                <span class="flex items-center justify-center w-12 h-12 rounded-full bg-green-100 text-green-600 font-bold text-lg">03</span>
+                <h3 class="text-2xl font-bold text-slate-900">Move In & Relax</h3>
+              </div>
+              <p class="text-lg text-slate-600 leading-relaxed mb-6">
+                Move into your new home. Pay rent, raise complaints, and order food directly from the app.
+              </p>
+               <ul class="space-y-3">
+                <li class="flex items-center gap-3 text-slate-700">
+                  <svg class="w-5 h-5 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                  <span>24/7 Digital support</span>
+                </li>
+                 <li class="flex items-center gap-3 text-slate-700">
+                  <svg class="w-5 h-5 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                  <span>Community events</span>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
       </div>
     </section>
 
+    <!-- Script for Process Toggler -->
+    <script>
+        function switchProcess(type) {
+            const ownersDiv = document.getElementById('process-owners');
+            const tenantsDiv = document.getElementById('process-tenants');
+            const btnOwners = document.getElementById('btn-owners');
+            const btnTenants = document.getElementById('btn-tenants');
+
+            if (type === 'owners') {
+                ownersDiv.classList.remove('hidden');
+                tenantsDiv.classList.add('hidden');
+                
+                btnOwners.classList.add('bg-white', 'text-slate-900', 'shadow-sm');
+                btnOwners.classList.remove('text-slate-500');
+                
+                btnTenants.classList.remove('bg-white', 'text-slate-900', 'shadow-sm');
+                btnTenants.classList.add('text-slate-500');
+            } else {
+                ownersDiv.classList.add('hidden');
+                tenantsDiv.classList.remove('hidden');
+
+                btnTenants.classList.add('bg-white', 'text-slate-900', 'shadow-sm');
+                btnTenants.classList.remove('text-slate-500');
+                
+                btnOwners.classList.remove('bg-white', 'text-slate-900', 'shadow-sm');
+                btnOwners.classList.add('text-slate-500');
+            }
+        }
+    </script>
+
     <!-- Why Choose Us -->
-    <section class="py-20 bg-white">
+    <section class="py-24 bg-white">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
-          <div
-            class="p-6 rounded-2xl bg-gray-50 hover:bg-white hover:shadow-xl transition-all duration-300 border border-gray-100"
-          >
-            <div
-              class="w-12 h-12 badge-nav rounded-lg flex items-center justify-center text-nav mb-4"
-            >
-              <svg
-                class="w-6 h-6"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M13 10V3L4 14h7v7l9-11h-7z"
-                />
-              </svg>
+        <div class="mb-16 max-w-3xl">
+          <h2 class="text-4xl font-bold text-slate-900 mb-6">
+            Why owners and tenants <span class="text-brand1">love us</span>
+          </h2>
+          <p class="text-xl text-slate-600">
+            Built with modern technology to ensure reliability, speed, and security at every step.
+          </p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <!-- Card 1: Super Fast (Span 2) -->
+            <div class="md:col-span-2 bg-slate-50 rounded-[2.5rem] p-8 md:p-12 transition-all duration-300 hover:shadow-xl border border-slate-100 relative overflow-hidden group">
+                <div class="relative z-10">
+                    <div class="w-14 h-14 bg-white rounded-2xl flex items-center justify-center shadow-sm mb-8 text-brand2">
+                        <svg class="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                    </div>
+                    <h3 class="text-3xl font-bold text-slate-900 mb-4">Super Fast Experience</h3>
+                    <p class="text-slate-600 text-lg max-w-lg leading-relaxed">Optimized for speed so you never have to wait. Our platform loads instantly and updates in real-time, ensuring a smooth experience for everyone.</p>
+                </div>
+                 <div class="absolute right-0 bottom-0 w-64 h-64 bg-brand2/10 rounded-full blur-3xl transform translate-y-1/3 translate-x-1/4 group-hover:bg-brand2/20 transition-all duration-500"></div>
             </div>
-            <h3 class="text-lg font-bold mb-2">Super Fast</h3>
-            <p class="text-gray-600 text-sm">
-              Optimized for speed so you don't wait.
-            </p>
-          </div>
-          <div
-            class="p-6 rounded-2xl bg-gray-50 hover:bg-white hover:shadow-xl transition-all duration-300 border border-gray-100"
-          >
-            <div
-              class="w-12 h-12 badge-nav rounded-lg flex items-center justify-center text-nav mb-4"
-            >
-              <svg
-                class="w-6 h-6"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
-                />
-              </svg>
+
+            <!-- Card 2: Secure (Span 1) -->
+            <div class="bg-slate-50 rounded-[2.5rem] p-8 transition-all duration-300 hover:shadow-xl border border-slate-100 relative overflow-hidden group">
+                 <div class="relative z-10">
+                    <div class="w-14 h-14 bg-white rounded-2xl flex items-center justify-center shadow-sm mb-8 text-nav-900">
+                        <svg class="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+                    </div>
+                    <h3 class="text-2xl font-bold text-slate-900 mb-4">Bank-Grade Security</h3>
+                    <p class="text-slate-600 leading-relaxed">Data protection with industry standards. Your personal and financial information is always safe.</p>
+                </div>
+                 <div class="absolute right-0 top-0 w-32 h-32 bg-nav-900/5 rounded-full blur-2xl group-hover:bg-nav-900/10 transition-all duration-500"></div>
             </div>
-            <h3 class="text-lg font-bold mb-2">Secure</h3>
-            <p class="text-gray-600 text-sm">
-              Data protection with industry standards.
-            </p>
-          </div>
-          <div
-            class="p-6 rounded-2xl bg-gray-50 hover:bg-white hover:shadow-xl transition-all duration-300 border border-gray-100"
-          >
-            <div
-              class="w-12 h-12 badge-brand rounded-lg flex items-center justify-center text-brand1 mb-4"
-            >
-              <svg
-                class="w-6 h-6"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                />
-              </svg>
+
+            <!-- Card 3: Easy to Use (Span 1) -->
+             <div class="bg-slate-900 rounded-[2.5rem] p-8 transition-all duration-300 hover:shadow-xl border border-slate-800 relative overflow-hidden group text-white">
+                 <div class="relative z-10">
+                    <div class="w-14 h-14 bg-white/10 rounded-2xl flex items-center justify-center backdrop-blur-sm mb-8 text-white">
+                        <svg class="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                    </div>
+                    <h3 class="text-2xl font-bold text-white mb-4">Simple & Intuitive</h3>
+                    <p class="text-slate-300 leading-relaxed">Zero learning curve. Designed for clarity so you can get things done without confusion.</p>
+                </div>
+                 <div class="absolute left-0 bottom-0 w-40 h-40 bg-brand1/20 rounded-full blur-3xl group-hover:bg-brand1/30 transition-all duration-500"></div>
             </div>
-            <h3 class="text-lg font-bold mb-2">Easy to Use</h3>
-            <p class="text-gray-600 text-sm">
-              Intuitive interface for zero learning curve.
-            </p>
-          </div>
-          <div
-            class="p-6 rounded-2xl bg-gray-50 hover:bg-white hover:shadow-xl transition-all duration-300 border border-gray-100"
-          >
-            <div
-              class="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center text-orange-600 mb-4"
-            >
-              <svg
-                class="w-6 h-6"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
-                />
-              </svg>
+
+            <!-- Card 4: Real-time (Span 2) -->
+            <div class="md:col-span-2 bg-slate-50 rounded-[2.5rem] p-8 md:p-12 transition-all duration-300 hover:shadow-xl border border-slate-100 relative overflow-hidden group">
+                 <div class="relative z-10">
+                    <div class="w-14 h-14 bg-white rounded-2xl flex items-center justify-center shadow-sm mb-8 text-green-500">
+                        <svg class="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                    </div>
+                     <h3 class="text-3xl font-bold text-slate-900 mb-4">Real-time Sync</h3>
+                    <p class="text-slate-600 text-lg max-w-lg leading-relaxed">Live availability and instant updates across all devices. Never miss a booking request or payment notification.</p>
+                </div>
+                <!-- Decor -->
+                 <div class="absolute right-0 bottom-0 w-64 h-64 bg-green-400/10 rounded-full blur-3xl transform translate-y-1/3 translate-x-1/4 group-hover:bg-green-400/20 transition-all duration-500"></div>
             </div>
-            <h3 class="text-lg font-bold mb-2">Real-time</h3>
-            <p class="text-gray-600 text-sm">
-              Live availability and instant updates.
-            </p>
-          </div>
         </div>
       </div>
     </section>
