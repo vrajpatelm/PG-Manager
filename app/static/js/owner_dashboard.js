@@ -1,5 +1,11 @@
 // Owner Dashboard JS
 document.addEventListener('DOMContentLoaded', () => {
+    // Check Theme
+    if (localStorage.getItem('theme') === 'dark') {
+        document.documentElement.classList.add('dark');
+    } else {
+        document.documentElement.classList.remove('dark'); // Ensure it's off if preference is light or default
+    }
     console.log('Owner Dashboard Loaded');
 
     // Sidebar Elements

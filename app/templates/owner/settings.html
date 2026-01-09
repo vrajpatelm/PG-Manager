@@ -1,0 +1,280 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Settings - PG-Manager</title>
+  <!-- Tailwind & Custom CSS -->
+  <link rel="stylesheet" href="/static/css/tailwind.css">
+  <link rel="stylesheet" href="/static/css/custom.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+  
+  <style>
+    /* Specific Dashboard Overrides */
+    .sidebar-link {
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        position: relative;
+        overflow: hidden;
+    }
+    .sidebar-link::before {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 0;
+        height: 100%;
+        width: 3px;
+        background: linear-gradient(180deg, var(--brand-1), var(--brand-2));
+        opacity: 0;
+        transition: opacity 0.3s;
+    }
+    .sidebar-link.active {
+        background: rgba(var(--brand-1-rgb), 0.08); /* Brand 1 @ 8% opacity */
+        color: var(--brand-1);
+    }
+    .sidebar-link.active::before {
+        opacity: 1;
+    }
+    .sidebar-link:hover:not(.active) {
+        background: rgba(var(--nav-900-rgb), 0.03);
+        color: var(--nav-900);
+    }
+  </style>
+</head>
+<body class="bg-gray-50 text-gray-900 font-sans h-screen overflow-hidden flex">
+
+  <!-- Background Decorations -->
+  <div class="fixed top-0 left-0 w-full h-full overflow-hidden -z-10 pointer-events-none">
+    <div class="absolute top-[-20%] left-[-10%] w-[500px] h-[500px] decoration-1 rounded-full blur-[100px] opacity-30"></div>
+    <div class="absolute bottom-[-20%] right-[-10%] w-[500px] h-[500px] decoration-2 rounded-full blur-[100px] opacity-30"></div>
+  </div>
+
+  <!-- Mobile Overlay -->
+  <div id="sidebar-overlay" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-30 hidden transition-opacity opacity-0 md:hidden"></div>
+
+  <!-- Sidebar -->
+  <aside id="sidebar" class="fixed inset-y-0 left-0 z-40 w-72 h-full glass border-r border-white/60 flex flex-col justify-between shrink-0 shadow-2xl shadow-gray-200/50 transform -translate-x-full transition-transform duration-300 ease-in-out md:static md:translate-x-0">
+      
+      <!-- Logo Section -->
+      <div class="p-8 pb-4 flex justify-between items-center">
+        <a href="/" class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-xl brand-avatar flex items-center justify-center text-white font-bold text-xl shadow-lg shadow-brand1/20 transition-transform hover:scale-105">P</div>
+            <div>
+                <span class="font-bold text-xl tracking-tight text-slate-900 block leading-none">PG-Manager</span>
+                <span class="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">Owner Panel</span>
+            </div>
+        </a>
+        <button id="sidebar-close" class="md:hidden text-slate-500 hover:text-slate-800">
+            <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+        </button>
+      </div>
+
+      <!-- Navigation -->
+      <nav class="flex-1 px-4 py-6 space-y-1.5 overflow-y-auto custom-scrollbar">
+          <div class="px-4 pb-2"><span class="text-[11px] font-bold text-slate-400 uppercase tracking-widest">Main Menu</span></div>
+
+          <a href="/owner/dashboard" class="sidebar-link flex items-center gap-3.5 px-4 py-3.5 rounded-xl font-medium text-slate-600 hover:bg-white/50 transition-colors">
+              <svg class="w-5 h-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" /></svg>
+              <span>Dashboard</span>
+          </a>
+
+          <a href="#" class="sidebar-link flex items-center gap-3.5 px-4 py-3.5 rounded-xl font-medium text-slate-600 hover:bg-white/50 transition-colors">
+              <svg class="w-5 h-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" /></svg>
+              <span>My Properties</span>
+          </a>
+
+          <a href="/owner/tenants" class="sidebar-link flex items-center gap-3.5 px-4 py-3.5 rounded-xl font-medium text-slate-600 hover:bg-white/50 transition-colors">
+              <svg class="w-5 h-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" /></svg>
+              <span>Tenants</span>
+          </a>
+          
+          <a href="#" class="sidebar-link flex items-center gap-3.5 px-4 py-3.5 rounded-xl font-medium text-slate-600 hover:bg-white/50 transition-colors">
+              <svg class="w-5 h-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" /></svg>
+              <span>Payments</span>
+          </a>
+
+           <a href="#" class="sidebar-link flex items-center gap-3.5 px-4 py-3.5 rounded-xl font-medium text-slate-600 hover:bg-white/50 transition-colors">
+              <svg class="w-5 h-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" /></svg>
+              <span>Complaints</span>
+          </a>
+
+           <a href="/owner/settings" class="sidebar-link active flex items-center gap-3.5 px-4 py-3.5 rounded-xl font-medium text-slate-600 bg-white/60 shadow-sm text-brand1">
+              <svg class="w-5 h-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+              <span>Settings</span>
+          </a>
+      </nav>
+
+      <!-- User Profile -->
+      <div class="p-4 m-4 mt-0 bg-white/40 rounded-2xl border border-white/50 backdrop-blur-sm">
+          <div class="flex items-center gap-3">
+              <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Felix" alt="User" class="w-10 h-10 rounded-full border-2 border-white shadow-sm bg-gray-100">
+              <div class="flex-1 min-w-0">
+                  <p class="text-sm font-bold text-slate-800 truncate">John Owner</p>
+                  <p class="text-xs text-slate-500 truncate">Premium Plan</p>
+              </div>
+          </div>
+      </div>
+  </aside>
+
+  <!-- Main Content -->
+  <main class="flex-1 h-full overflow-y-auto relative z-10 p-4 md:p-8 custom-scrollbar">
+       <!-- Header -->
+       <header class="flex justify-between items-center mb-8 gap-4 flex-wrap">
+           <div class="flex items-center gap-4">
+               <button id="sidebar-toggle" class="md:hidden p-2 rounded-lg bg-white/50 border border-gray-200 text-slate-600 hover:bg-white hover:text-brand1 transition-colors">
+                   <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h7" /></svg>
+               </button>
+               <div>
+                   <h1 class="text-2xl md:text-3xl font-bold text-slate-900">Settings</h1>
+                   <p class="text-slate-500 text-sm md:text-base hidden sm:block">Manage your account and preferences.</p>
+               </div>
+           </div>
+       </header>
+
+       <!-- Settings Container -->
+        <div class="bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden flex flex-col md:flex-row min-h-[500px]">
+            
+            <!-- Tabs Sidebar -->
+            <div class="w-full md:w-64 border-b md:border-b-0 md:border-r border-gray-100 bg-gray-50/50 p-4 shrink-0">
+                <nav class="space-y-1">
+                    <button id="btn-profile" class="w-full text-left px-4 py-2.5 rounded-xl font-medium text-sm bg-white shadow-sm ring-1 ring-gray-950/5 text-brand1 mb-1 transition-all tab-trigger" onclick="switchTab('profile')">
+                        Profile & Account
+                    </button>
+                    <button id="btn-preferences" class="w-full text-left px-4 py-2.5 rounded-xl font-medium text-sm text-slate-600 hover:bg-white hover:shadow-sm hover:text-slate-900 transition-all tab-trigger" onclick="switchTab('preferences')">
+                         Preferences
+                    </button>
+                    <button id="btn-data" class="w-full text-left px-4 py-2.5 rounded-xl font-medium text-sm text-slate-600 hover:bg-white hover:shadow-sm hover:text-slate-900 transition-all tab-trigger" onclick="switchTab('data')">
+                        Data Management
+                    </button>
+                </nav>
+            </div>
+
+            <!-- Content Area -->
+            <div class="flex-1 p-6 md:p-8 relative">
+                
+                <!-- Tab: Profile -->
+                <div id="tab-profile" class="tab-content space-y-6">
+                     <h2 class="text-lg font-bold text-slate-900 border-b border-gray-100 pb-4">Profile Settings</h2>
+                     
+                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                         <!-- Avatar -->
+                         <div class="md:col-span-2 flex items-center gap-4">
+                             <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Felix" class="w-20 h-20 rounded-full border-4 border-white shadow-md bg-gray-100">
+                             <div>
+                                 <button class="px-4 py-2 bg-white border border-gray-200 rounded-lg text-sm font-medium text-slate-700 hover:bg-gray-50 transition-colors">Change Photo</button>
+                                 <p class="text-xs text-slate-400 mt-2">JPG, GIF or PNG. Max size of 800K</p>
+                             </div>
+                         </div>
+
+                         <!-- Form Fields -->
+                         <div class="space-y-2">
+                             <label class="block text-sm font-medium text-slate-700">Display Name</label>
+                             <input type="text" value="John Owner" class="w-full px-4 py-2.5 bg-white border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-brand1/20 focus:border-brand1">
+                         </div>
+
+                         <div class="space-y-2">
+                             <label class="block text-sm font-medium text-slate-700">Email Address</label>
+                             <input type="email" value="john@example.com" class="w-full px-4 py-2.5 bg-white border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-brand1/20 focus:border-brand1">
+                         </div>
+
+                         <div class="space-y-2">
+                             <label class="block text-sm font-medium text-slate-700">Phone Number</label>
+                             <input type="tel" value="+91 98765 43210" class="w-full px-4 py-2.5 bg-white border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-brand1/20 focus:border-brand1">
+                         </div>
+                     </div>
+                </div>
+
+                <!-- Tab: Preferences -->
+                <div id="tab-preferences" class="tab-content space-y-6 hidden">
+                    <h2 class="text-lg font-bold text-slate-900 border-b border-gray-100 pb-4">App Preferences</h2>
+                    
+                    <div class="space-y-4">
+                        <div class="flex items-center justify-between p-4 bg-gray-50 rounded-2xl border border-gray-100">
+                            <div>
+                                <h3 class="text-sm font-bold text-slate-900">Dark Mode</h3>
+                                <p class="text-xs text-slate-500">Switch between light and dark themes.</p>
+                            </div>
+                            <label class="relative inline-flex items-center cursor-pointer">
+                                <input type="checkbox" id="darkModeToggle" class="sr-only peer">
+                                <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-brand1/20 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-slate-900"></div>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tab: Data -->
+                <div id="tab-data" class="tab-content space-y-6 hidden">
+                    <h2 class="text-lg font-bold text-slate-900 border-b border-gray-100 pb-4">Data Management</h2>
+                    
+                     <div class="p-4 bg-blue-50 rounded-2xl border border-blue-100 flex items-start gap-4">
+                        <div class="p-2 bg-blue-100 text-blue-600 rounded-lg shrink-0">
+                             <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
+                        </div>
+                        <div>
+                            <h3 class="text-sm font-bold text-blue-900">Export Tenant Data</h3>
+                            <p class="text-xs text-blue-700 mt-1 mb-3">Download a CSV file containing all your tenant records, including contact details and payment status.</p>
+                            <a href="/owner/export/tenants" class="px-4 py-2 bg-blue-600 text-white text-xs font-bold rounded-lg hover:bg-blue-700 transition-colors inline-block">Download CSV</a>
+                        </div>
+                     </div>
+                </div>
+                
+                <!-- Footer Save (Fixed at bottom right of content area) -->
+                <div class="mt-8 pt-6 border-t border-gray-100 flex justify-end gap-3">
+                     <button class="px-5 py-2.5 text-slate-500 font-medium text-sm hover:text-slate-800 transition-colors">Cancel</button>
+                     <button class="px-5 py-2.5 bg-brand1 text-white font-bold text-sm rounded-xl hover:bg-brand2 shadow-lg shadow-brand1/20 transition-all hover:scale-[1.02]" onclick="saveSettings()">Save Changes</button>
+                </div>
+
+            </div>
+        </div>
+
+  </main>
+  
+  <script src="/static/js/owner_dashboard.js"></script>
+  <script>
+    function switchTab(tabName) {
+        // Hide all contents
+        document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+        document.getElementById('tab-' + tabName).classList.remove('hidden');
+        
+        // Reset all buttons
+        document.querySelectorAll('.tab-trigger').forEach(btn => {
+            btn.classList.add('text-slate-600', 'hover:bg-white');
+            btn.classList.remove('bg-white', 'shadow-sm', 'ring-1', 'ring-gray-950/5', 'text-brand1');
+        });
+        
+        // Active button
+        const activeBtn = document.getElementById('btn-' + tabName);
+        activeBtn.classList.remove('text-slate-600', 'hover:bg-white');
+        activeBtn.classList.add('bg-white', 'shadow-sm', 'ring-1', 'ring-gray-950/5', 'text-brand1');
+    }
+
+    function saveSettings() {
+        const isDarkMode = document.getElementById('darkModeToggle').checked;
+        localStorage.setItem('theme', isDarkMode ? 'dark' : 'light');
+        
+        // Apply immediately
+        if (isDarkMode) {
+            document.documentElement.classList.add('dark');
+        } else {
+            document.documentElement.classList.remove('dark');
+        }
+
+        // Feedback
+        const btn = document.querySelector('button[onclick="saveSettings()"]');
+        const originalText = btn.innerText;
+        btn.innerText = "Saved!";
+        btn.classList.add('bg-green-500');
+        setTimeout(() => {
+            btn.innerText = originalText;
+            btn.classList.remove('bg-green-500');
+        }, 2000);
+    }
+    
+    // Init Toggle State from LocalStorage
+    if (localStorage.getItem('theme') === 'dark') {
+        document.getElementById('darkModeToggle').checked = true;
+    }
+  </script>
+</body>
+</html>

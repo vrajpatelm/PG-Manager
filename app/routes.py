@@ -43,10 +43,28 @@ def owner_dashboard():
 def owner_tenants():
     return render_template('owner/tenants.html')
 
-
 @bp.route('/owner/add-tenant')
 def owner_add_tenant():
     return render_template('owner/add_tenant.html')
+
+
+@bp.route('/owner/settings')
+def owner_settings():
+    return render_template('owner/settings.html')
+
+
+@bp.route('/owner/export/tenants')
+def export_tenants():
+    # TODO: Implement actual CSV generation from database
+    # For now, return a mock CSV
+    csv_content = "Name,Email,Room,Status\nJohn Doe,john@example.com,101,Active\nJane Smith,jane@example.com,202,Paid"
+    
+    from flask import Response
+    return Response(
+        csv_content,
+        mimetype="text/csv",
+        headers={"Content-disposition": "attachment; filename=tenants.csv"}
+    )
 
 
 @bp.route('/owner/tenants/<int:tenant_id>')
