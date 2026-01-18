@@ -166,9 +166,79 @@ def owner_tenants():
     if session.get('role') != 'OWNER': return redirect(url_for('main.login'))
     return render_template('owner/tenants.html')
 
-@bp.route('/owner/add-tenant')
+@bp.route('/owner/add-tenant', methods=['GET', 'POST'])
 def owner_add_tenant():
     if session.get('role') != 'OWNER': return redirect(url_for('main.login'))
+    
+    if request.method == 'POST':
+        full_name = request.form.get('full_name')
+        email = request.form.get('email')
+        phone = request.form.get('phone')
+        room_no = request.form.get('room_no')
+        rent = request.form.get('rent')
+        
+        # Simple Validation
+        if not full_name or not email:
+            flash("Name and Email are required", "error")
+            return redirect(url_for('main.owner_add_tenant'))
+            
+        if not rent:
+            flash("Monthly Rent is mandatory", "error")
+            return redirect(url_for('main.owner_add_tenant'))
+
+        user_id = session.get('user_id')
+        
+        conn = get_db_connection()
+        if not conn:
+            flash("Database Connection Error", "error")
+            return redirect(url_for('main.owner_add_tenant'))
+            
+        cur = conn.cursor()
+        try:
+             # Get Owner ID
+            cur.execute("SELECT id FROM owners WHERE user_id = %s", (user_id,))
+            owner_row = cur.fetchone()
+            if not owner_row:
+                 flash("Owner profile not found", "error")
+                 return redirect(url_for('main.login'))
+            
+            owner_id = owner_row[0]
+            
+            # 1. Check if email already invited (Global or Owner specific? Unique Constraint is per Owner)
+            cur.execute("SELECT id FROM tenants WHERE email = %s AND owner_id = %s", (email, owner_id))
+            if cur.fetchone():
+                flash(f"Tenant with email '{email}' already exists.", "error")
+                return redirect(url_for('main.owner_add_tenant'))
+
+            # 2. Check if Phone Number already exists
+            if phone:
+                cur.execute("SELECT id FROM tenants WHERE phone_number = %s AND owner_id = %s", (phone, owner_id))
+                if cur.fetchone():
+                    flash(f"Tenant with phone number '{phone}' is already added.", "error")
+                    return redirect(url_for('main.owner_add_tenant'))
+                
+            # Insert Tenant
+            cur.execute("""
+                INSERT INTO tenants (owner_id, full_name, email, phone_number, room_number, monthly_rent, onboarding_status)
+                VALUES (%s, %s, %s, %s, %s, %s, 'PENDING')
+            """, (owner_id, full_name, email, phone, room_no, rent))
+            
+            conn.commit()
+            flash("Tenant added successfully! They can now sign up.", "success")
+            return redirect(url_for('main.owner_tenants'))
+
+        except Exception as e:
+            conn.rollback()
+            print(f"Error adding tenant: {e}")
+            # Try to give a hint if it's a database constraint issue that wasn't caught
+            if "unique constraint" in str(e).lower():
+                 flash("A record with this email or ID already exists.", "error")
+            else:
+                 flash("System Error: Could not add tenant. Please check connection.", "error")
+        finally:
+             cur.close()
+             conn.close()
+
     return render_template('owner/add_tenant.html')
 
 

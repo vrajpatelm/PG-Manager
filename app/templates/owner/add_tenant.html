@@ -129,48 +129,55 @@
           </div>
       </header>
 
+      <!-- Flash Messages -->
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+          <div class="mb-6 space-y-2 max-w-7xl mx-auto">
+            {% for category, message in messages %}
+              <div class="p-4 rounded-xl text-sm font-medium flex items-center gap-2
+                  {% if category == 'error' %} bg-red-50 text-red-600 border border-red-100
+                  {% elif category == 'success' %} bg-green-50 text-green-600 border border-green-100
+                  {% else %} bg-blue-50 text-blue-600 border border-blue-100 {% endif %}">
+                {% if category == 'error' %}
+                  <svg class="w-5 h-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                {% elif category == 'success' %}
+                   <svg class="w-5 h-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
+                 {% else %}
+                    <svg class="w-5 h-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                {% endif %}
+                <span>{{ message }}</span>
+              </div>
+            {% endfor %}
+          </div>
+        {% endif %}
+      {% endwith %}
+
       <!-- Form Grid -->
-      <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 max-w-7xl mx-auto">
+      <form method="POST" action="{{ url_for('main.owner_add_tenant') }}" class="grid grid-cols-1 lg:grid-cols-3 gap-8 max-w-7xl mx-auto">
           
           <!-- Column 1: Personal Info & Photo -->
           <div class="flex flex-col gap-6">
-               <!-- Photo Upload -->
-               <div class="bg-white rounded-3xl p-6 border border-gray-100 shadow-sm text-center">
-                   <div class="relative w-32 h-32 mx-auto mb-4 group cursor-pointer">
-                       <div class="w-full h-full rounded-full bg-gray-100 border-2 border-dashed border-gray-300 flex items-center justify-center text-slate-400 group-hover:border-brand1 group-hover:text-brand1 transition-colors overflow-hidden">
-                           <svg class="w-10 h-10" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
-                       </div>
-                       <div class="absolute inset-0 bg-black/40 rounded-full opacity-0 group-hover:opacity-100 flex items-center justify-center text-white text-xs font-bold transition-opacity">Upload Photo</div>
-                   </div>
-                   <h3 class="text-sm font-bold text-slate-800">Tenant Photo</h3>
-                   <p class="text-xs text-slate-500 mb-4">Allowed *.jpeg, *.jpg, *.png, *.webp</p>
-               </div>
-
                <!-- Basic Details -->
                <div class="bg-white rounded-3xl p-6 border border-gray-100 shadow-sm space-y-4">
                    <h3 class="text-lg font-bold text-slate-900 border-b border-gray-100 pb-3 mb-2">Personal Details</h3>
                    
                    <div>
-                       <label class="block text-sm font-bold text-slate-700 mb-1.5">Full Name</label>
-                       <input type="text" placeholder="e.g. John Doe" class="w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50 focus:bg-white focus:border-brand1 focus:ring-4 focus:ring-brand1/10 outline-none transition-all placeholder-gray-400 text-sm font-medium">
+                       <label class="block text-sm font-bold text-slate-700 mb-1.5">Full Name *</label>
+                       <input type="text" name="full_name" placeholder="e.g. John Doe" required class="w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50 focus:bg-white focus:border-brand1 focus:ring-4 focus:ring-brand1/10 outline-none transition-all placeholder-gray-400 text-sm font-medium">
                    </div>
                    
                    <div>
                        <label class="block text-sm font-bold text-slate-700 mb-1.5">Phone Number</label>
                        <div class="flex">
                            <span class="inline-flex items-center px-3 rounded-l-xl border border-r-0 border-gray-200 bg-gray-100 text-gray-500 text-sm font-bold">+91</span>
-                           <input type="tel" placeholder="98765 43210" class="w-full px-4 py-3 rounded-r-xl border border-gray-200 bg-gray-50 focus:bg-white focus:border-brand1 focus:ring-4 focus:ring-brand1/10 outline-none transition-all placeholder-gray-400 text-sm font-medium">
+                           <input type="tel" name="phone" placeholder="98765 43210" class="w-full px-4 py-3 rounded-r-xl border border-gray-200 bg-gray-50 focus:bg-white focus:border-brand1 focus:ring-4 focus:ring-brand1/10 outline-none transition-all placeholder-gray-400 text-sm font-medium">
                        </div>
                    </div>
 
                    <div>
-                       <label class="block text-sm font-bold text-slate-700 mb-1.5">Email Address</label>
-                       <input type="email" placeholder="john@example.com" class="w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50 focus:bg-white focus:border-brand1 focus:ring-4 focus:ring-brand1/10 outline-none transition-all placeholder-gray-400 text-sm font-medium">
-                   </div>
-
-                   <div>
-                        <label class="block text-sm font-bold text-slate-700 mb-1.5">Permanent Address</label>
-                        <textarea rows="3" placeholder="Full address..." class="w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50 focus:bg-white focus:border-brand1 focus:ring-4 focus:ring-brand1/10 outline-none transition-all placeholder-gray-400 text-sm font-medium resize-none"></textarea>
+                       <label class="block text-sm font-bold text-slate-700 mb-1.5">Email Address *</label>
+                       <input type="email" name="email" placeholder="john@example.com" required class="w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50 focus:bg-white focus:border-brand1 focus:ring-4 focus:ring-brand1/10 outline-none transition-all placeholder-gray-400 text-sm font-medium">
+                       <p class="text-[10px] text-slate-500 mt-1 ml-1">Used for sending invite & login</p>
                    </div>
                </div>
           </div>
@@ -181,41 +188,14 @@
                <div class="bg-white rounded-3xl p-6 border border-gray-100 shadow-sm space-y-4">
                    <h3 class="text-lg font-bold text-slate-900 border-b border-gray-100 pb-3 mb-2">Room Allocation</h3>
                    
-                   <div class="grid grid-cols-2 gap-4">
-                       <div>
-                           <label class="block text-sm font-bold text-slate-700 mb-1.5">Building</label>
-                           <select class="w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50 focus:bg-white focus:border-brand1 focus:ring-4 focus:ring-brand1/10 outline-none transition-all text-sm font-medium text-slate-700">
-                               <option>Select Building</option>
-                               <option>Building A</option>
-                               <option>Building B</option>
-                           </select>
-                       </div>
-                       <div>
-                           <label class="block text-sm font-bold text-slate-700 mb-1.5">Floor</label>
-                           <select class="w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50 focus:bg-white focus:border-brand1 focus:ring-4 focus:ring-brand1/10 outline-none transition-all text-sm font-medium text-slate-700">
-                               <option>Select Floor</option>
-                               <option>Ground Floor</option>
-                               <option>1st Floor</option>
-                           </select>
-                       </div>
-                   </div>
-
                    <div>
-                       <label class="block text-sm font-bold text-slate-700 mb-1.5">Room No.</label>
-                       <select class="w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50 focus:bg-white focus:border-brand1 focus:ring-4 focus:ring-brand1/10 outline-none transition-all text-sm font-medium text-slate-700">
-                           <option>Select Room</option>
-                           <option>101 (2 Beds Available)</option>
-                           <option>102 (1 Bed Available)</option>
-                       </select>
+                       <label class="block text-sm font-bold text-slate-700 mb-1.5">Room No. *</label>
+                       <input type="text" name="room_no" placeholder="e.g. 101" required class="w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50 focus:bg-white focus:border-brand1 focus:ring-4 focus:ring-brand1/10 outline-none transition-all placeholder-gray-400 text-sm font-medium">
                    </div>
                    
                    <div>
-                       <label class="block text-sm font-bold text-slate-700 mb-1.5">Bed No.</label>
-                        <select class="w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50 focus:bg-white focus:border-brand1 focus:ring-4 focus:ring-brand1/10 outline-none transition-all text-sm font-medium text-slate-700">
-                           <option>Select Bed</option>
-                           <option>Bed A</option>
-                           <option>Bed B</option>
-                       </select>
+                       <label class="block text-sm font-bold text-slate-700 mb-1.5">Bed No. (Optional)</label>
+                        <input type="text" name="bed_no" placeholder="e.g. A" class="w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50 focus:bg-white focus:border-brand1 focus:ring-4 focus:ring-brand1/10 outline-none transition-all placeholder-gray-400 text-sm font-medium">
                    </div>
                </div>
 
@@ -223,84 +203,30 @@
                <div class="bg-white rounded-3xl p-6 border border-gray-100 shadow-sm space-y-4">
                    <h3 class="text-lg font-bold text-slate-900 border-b border-gray-100 pb-3 mb-2">Financials</h3>
                    
-                   <div class="grid grid-cols-2 gap-4">
-                        <div>
-                           <label class="block text-sm font-bold text-slate-700 mb-1.5">Monthly Rent</label>
-                           <div class="relative">
-                               <span class="absolute left-4 top-3 text-slate-400">₹</span>
-                               <input type="number" placeholder="0000" class="w-full pl-8 pr-4 py-3 rounded-xl border border-gray-200 bg-gray-50 focus:bg-white focus:border-brand1 focus:ring-4 focus:ring-brand1/10 outline-none transition-all text-sm font-medium">
-                           </div>
-                        </div>
-                        <div>
-                           <label class="block text-sm font-bold text-slate-700 mb-1.5">Security Deposit</label>
-                           <div class="relative">
-                               <span class="absolute left-4 top-3 text-slate-400">₹</span>
-                               <input type="number" placeholder="0000" class="w-full pl-8 pr-4 py-3 rounded-xl border border-gray-200 bg-gray-50 focus:bg-white focus:border-brand1 focus:ring-4 focus:ring-brand1/10 outline-none transition-all text-sm font-medium">
-                           </div>
-                        </div>
-                   </div>
-
-                   <div class="grid grid-cols-2 gap-4">
-                       <div>
-                           <label class="block text-sm font-bold text-slate-700 mb-1.5">Lease Start</label>
-                           <input type="date" class="w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50 focus:bg-white focus:border-brand1 focus:ring-4 focus:ring-brand1/10 outline-none transition-all text-sm font-medium text-slate-700">
-                       </div>
-                       <div>
-                           <label class="block text-sm font-bold text-slate-700 mb-1.5">Lease End</label>
-                           <input type="date" class="w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50 focus:bg-white focus:border-brand1 focus:ring-4 focus:ring-brand1/10 outline-none transition-all text-sm font-medium text-slate-700">
+                   <div>
+                       <label class="block text-sm font-bold text-slate-700 mb-1.5">Monthly Rent</label>
+                       <div class="relative">
+                           <span class="absolute left-4 top-3 text-slate-400">₹</span>
+                           <input type="number" name="rent" placeholder="0000" required class="w-full pl-8 pr-4 py-3 rounded-xl border border-gray-200 bg-gray-50 focus:bg-white focus:border-brand1 focus:ring-4 focus:ring-brand1/10 outline-none transition-all text-sm font-medium">
                        </div>
                    </div>
                </div>
           </div>
 
-          <!-- Column 3: Documents & Summary -->
+          <!-- Column 3: Summary & Actions -->
           <div class="flex flex-col gap-6">
-              <!-- ID Proof -->
-              <div class="bg-white rounded-3xl p-6 border border-gray-100 shadow-sm">
-                  <h3 class="text-lg font-bold text-slate-900 border-b border-gray-100 pb-3 mb-4">Documents</h3>
-                  
-                  <div class="mb-4">
-                      <label class="block text-sm font-bold text-slate-700 mb-1.5">ID Proof (Aadhar/Passport)</label>
-                      <div class="border-2 border-dashed border-gray-200 rounded-xl p-6 text-center hover:bg-gray-50 transition-colors cursor-pointer">
-                          <svg class="w-8 h-8 mx-auto text-slate-300 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
-                          <p class="text-xs font-medium text-brand1">Click to Upload</p>
-                          <p class="text-[10px] text-slate-400 mt-1">or drag and drop</p>
-                      </div>
-                  </div>
-
-                  <div>
-                      <label class="block text-sm font-bold text-slate-700 mb-1.5">Rental Agreement</label>
-                      <div class="border-2 border-dashed border-gray-200 rounded-xl p-6 text-center hover:bg-gray-50 transition-colors cursor-pointer">
-                          <svg class="w-8 h-8 mx-auto text-slate-300 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
-                          <p class="text-xs font-medium text-brand1">Click to Upload</p>
-                          <p class="text-[10px] text-slate-400 mt-1">or drag and drop</p>
-                      </div>
-                  </div>
-              </div>
-
                <!-- Summary Card -->
                <div class="bg-gradient-to-br from-slate-900 to-slate-800 rounded-3xl p-6 text-white shadow-xl shadow-slate-900/10">
                    <h3 class="text-lg font-bold mb-4">Summary</h3>
-                   <div class="space-y-3 mb-6">
-                       <div class="flex justify-between text-sm">
-                           <span class="text-slate-400">Monthly Rent</span>
-                           <span class="font-medium">₹ 0</span>
-                       </div>
-                       <div class="flex justify-between text-sm">
-                           <span class="text-slate-400">Security Deposit</span>
-                           <span class="font-medium">₹ 0</span>
-                       </div>
-                       <div class="h-px bg-white/10 my-2"></div>
-                       <div class="flex justify-between text-base">
-                           <span class="font-medium">Total Due</span>
-                           <span class="font-bold text-brand2">₹ 0</span>
-                       </div>
+                   <div class="mb-6">
+                       <p class="text-sm text-slate-400 mb-2">Ready to onboard?</p>
+                       <p class="text-xs text-slate-500">This will verify the email and allow the tenant to create an account linked to your property.</p>
                    </div>
-                   <button class="w-full bg-white text-slate-900 font-bold py-3 rounded-xl hover:bg-gray-50 transition-colors shadow-lg">Confirm Onboarding</button>
+                   <button type="submit" class="w-full bg-white text-slate-900 font-bold py-3 rounded-xl hover:bg-gray-50 transition-colors shadow-lg">Confirm Onboarding</button>
                </div>
           </div>
           
-      </div>
+      </form>
 
   </main>
   
