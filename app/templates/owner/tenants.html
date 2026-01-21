@@ -53,19 +53,19 @@
     <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
           <div class="bg-white/60 glass p-4 rounded-2xl border border-white/60 shadow-sm">
               <span class="text-slate-400 text-xs font-bold uppercase tracking-wider">Total</span>
-              <p class="text-2xl font-bold text-slate-800">45</p>
+              <p class="text-2xl font-bold text-slate-800">{{ stats.total }}</p>
           </div>
           <div class="bg-white/60 glass p-4 rounded-2xl border border-white/60 shadow-sm">
               <span class="text-slate-400 text-xs font-bold uppercase tracking-wider">Active</span>
-              <p class="text-2xl font-bold text-green-600">42</p>
+              <p class="text-2xl font-bold text-green-600">{{ stats.active }}</p>
           </div>
           <div class="bg-white/60 glass p-4 rounded-2xl border border-white/60 shadow-sm">
               <span class="text-slate-400 text-xs font-bold uppercase tracking-wider">Rent Due</span>
-              <p class="text-2xl font-bold text-orange-500">12</p>
+              <p class="text-2xl font-bold text-orange-500">{{ stats.rent_due }}</p>
           </div>
            <div class="bg-white/60 glass p-4 rounded-2xl border border-white/60 shadow-sm">
               <span class="text-slate-400 text-xs font-bold uppercase tracking-wider">Notice</span>
-              <p class="text-2xl font-bold text-slate-600">3</p>
+              <p class="text-2xl font-bold text-slate-600">{{ stats.notice }}</p>
           </div>
     </div>
 
@@ -73,98 +73,70 @@
     <div class="bg-white rounded-3xl p-4 mb-6 border border-gray-100 shadow-sm flex flex-col md:flex-row gap-4 justify-between items-center">
         
         <!-- Tabs -->
-            <button class="flex-1 md:flex-none px-4 py-2 rounded-lg text-sm font-bold text-brand1 bg-white shadow-sm transition-all tab-btn active" data-tab="all">All Tenants</button>
-            <button class="flex-1 md:flex-none px-4 py-2 rounded-lg text-sm font-medium text-slate-500 hover:text-slate-700 transition-all tab-btn" data-tab="rent-due">Rent Due</button>
-            <button class="flex-1 md:flex-none px-4 py-2 rounded-lg text-sm font-medium text-slate-500 hover:text-slate-700 transition-all tab-btn" data-tab="lease-expiring">Lease Expiring</button>
-            <button class="flex-1 md:flex-none px-4 py-2 rounded-lg text-sm font-medium text-slate-500 hover:text-slate-700 transition-all tab-btn" data-tab="active">Active</button>
-            <button class="flex-1 md:flex-none px-4 py-2 rounded-lg text-sm font-medium text-slate-500 hover:text-slate-700 transition-all tab-btn" data-tab="past">Past Tenants</button>
+            {% set current_filter = request.args.get('filter', 'all') %}
+            <a href="{{ url_for('main.owner_tenants', filter='all') }}" class="flex-1 md:flex-none px-4 py-2 rounded-lg text-sm font-bold shadow-sm transition-all tab-btn {% if current_filter == 'all' %}text-brand1 bg-white{% else %}text-slate-500 hover:text-slate-700{% endif %}">All Tenants</a>
+            <a href="{{ url_for('main.owner_tenants', filter='rent-due') }}" class="flex-1 md:flex-none px-4 py-2 rounded-lg text-sm font-medium transition-all tab-btn {% if current_filter == 'rent-due' %}text-brand1 bg-white shadow-sm font-bold{% else %}text-slate-500 hover:text-slate-700{% endif %}">Rent Due</a>
+            <a href="{{ url_for('main.owner_tenants', filter='lease-expiring') }}" class="flex-1 md:flex-none px-4 py-2 rounded-lg text-sm font-medium transition-all tab-btn {% if current_filter == 'lease-expiring' %}text-brand1 bg-white shadow-sm font-bold{% else %}text-slate-500 hover:text-slate-700{% endif %}">Lease Expiring</a>
+            <a href="{{ url_for('main.owner_tenants', filter='active') }}" class="flex-1 md:flex-none px-4 py-2 rounded-lg text-sm font-medium transition-all tab-btn {% if current_filter == 'active' %}text-brand1 bg-white shadow-sm font-bold{% else %}text-slate-500 hover:text-slate-700{% endif %}">Active</a>
+            <a href="{{ url_for('main.owner_tenants', filter='past') }}" class="flex-1 md:flex-none px-4 py-2 rounded-lg text-sm font-medium transition-all tab-btn {% if current_filter == 'past' %}text-brand1 bg-white shadow-sm font-bold{% else %}text-slate-500 hover:text-slate-700{% endif %}">Past Tenants</a>
 
         <!-- Search -->
-        <div class="relative w-full md:w-72">
-             <svg class="w-5 h-5 absolute left-3 top-2.5 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
-             <input type="text" placeholder="Search by name, room..." class="w-full pl-10 pr-4 py-2.5 rounded-xl border border-gray-200 bg-gray-50 focus:bg-white focus:border-brand1 focus:ring-4 focus:ring-brand1/10 outline-none transition-all placeholder-gray-400 text-sm font-medium">
-        </div>
+        <form action="{{ url_for('main.owner_tenants') }}" method="GET" class="relative w-full md:w-72">
+             <!-- Preserve current filter if any -->
+             {% if request.args.get('filter') %}
+             <input type="hidden" name="filter" value="{{ request.args.get('filter') }}">
+             {% endif %}
+             
+             <button type="submit" class="absolute left-3 top-2.5 text-slate-400 hover:text-brand1">
+                 <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
+             </button>
+             <input type="text" name="search" value="{{ request.args.get('search', '') }}" placeholder="Search by name, room..." class="w-full pl-10 pr-4 py-2.5 rounded-xl border border-gray-200 bg-gray-50 focus:bg-white focus:border-brand1 focus:ring-4 focus:ring-brand1/10 outline-none transition-all placeholder-gray-400 text-sm font-medium">
+        </form>
     </div>
 
-    <!-- Tenants Table -->
-    <div class="bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden">
-        <div class="overflow-x-auto">
-            <table class="w-full text-left border-collapse">
-                <thead>
-                    <tr class="bg-gray-50/50 border-b border-gray-100 text-xs uppercase tracking-wider text-slate-400">
-                        <th class="px-6 py-4 font-bold">Tenant Name</th>
-                        <th class="px-6 py-4 font-bold">Details</th>
-                        <th class="px-6 py-4 font-bold">Contact</th> <!-- Added Phone -->
-                        <th class="px-6 py-4 font-bold">Move In</th>
-                        <th class="px-6 py-4 font-bold">Rent Status</th>
-                        <th class="px-6 py-4 font-bold">Status</th> <!-- Added Status -->
-                        <th class="px-6 py-4 font-bold text-right">Actions</th>
-                    </tr>
-                </thead>
-                <tbody class="divide-y divide-gray-50" id="tenant-list">
-                    {% if not tenants %}
-                      <tr>
-                          <td colspan="7" class="text-center py-8 text-slate-500">
-                              <p>No tenants found. Click "Add Tenant" to get started.</p>
-                          </td>
-                      </tr>
-                    {% else %}
-                      {% for tenant in tenants %}
-                         <tr class="group hover:bg-gray-50/80 transition-colors">
-                            <td class="px-6 py-4">
-                                <div class="flex items-center gap-3">
-                                    <!-- Avatar seed is name -->
-                                    <img src="https://api.dicebear.com/7.x/avataaars/svg?seed={{ tenant.full_name }}" class="w-10 h-10 rounded-full bg-gray-100">
-                                    <div>
-                                        <p class="text-sm font-bold text-slate-900">{{ tenant.full_name }}</p>
-                                        <p class="text-xs text-slate-500">{{ tenant.email }}</p>
-                                    </div>
-                                </div>
-                            </td>
-                            <td class="px-6 py-4">
-                                <p class="text-sm font-medium text-slate-700">Room {{ tenant.room_no }}</p>
-                                <p class="text-xs text-slate-400">Rent: ₹{{ tenant.rent }}</p>
-                            </td>
-                            <td class="px-6 py-4">
-                                <p class="text-sm font-medium text-slate-700">{{ tenant.phone if tenant.phone else 'N/A' }}</p>
-                            </td>
-                            <td class="px-6 py-4">
-                                <span class="text-sm text-slate-600 font-medium">{{ tenant.joined }}</span>
-                            </td>
-                            <td class="px-6 py-4">
-                                <!-- Placeholder for Rent Status logic -->
-                                <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold bg-gray-100 text-gray-500">
-                                    --
-                                </span>
-                            </td>
-                            <td class="px-6 py-4">
-                                {% if tenant.status == 'ACTIVE' %}
-                                  <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold bg-green-100 text-green-600">Active</span>
-                                {% else %}
-                                  <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold bg-yellow-100 text-yellow-600">Pending</span>
-                                {% endif %}
-                            </td>
-                            <td class="px-6 py-4 text-right">
-                                <div class="flex items-center justify-end gap-1">
-                                  <a href="#" title="Message" class="p-2 text-slate-400 hover:text-brand1 transition-colors"><svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" /></svg></a>
-                                  <a href="/owner/tenants/{{ tenant.id }}" title="View Profile" class="p-2 text-slate-400 hover:text-brand1 transition-colors"><svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg></a>
-                                  <a href="#" title="Edit" class="p-2 text-slate-400 hover:text-brand1 transition-colors"><svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" /></svg></a>
-                                </div>
-                            </td>
-                         </tr>
-                      {% endfor %}
-                    {% endif %}
-                </tbody>
-            </table>
-        </div>
-        <!-- Pagination -->
-        <div class="px-6 py-4 border-t border-gray-100 flex justify-between items-center text-sm">
-            <span class="text-slate-500">Showing 1 to 3 of 45 tenants</span>
-            <div class="flex gap-2">
-                <button class="px-3 py-1 rounded-lg border border-gray-200 text-slate-500 hover:bg-gray-50">Previous</button>
-                <button class="px-3 py-1 rounded-lg border border-gray-200 text-slate-500 hover:bg-gray-50">Next</button>
-            </div>
-        </div>
+    <!-- Tenants Table & Pagination -->
+    <div id="tenants-container">
+        {% include "owner/partials/tenant_list_with_pagination.html" %}
     </div>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const searchInput = document.querySelector('input[name="search"]');
+            
+            // Use event delegation for pagination clicks if we wanted AJAX pagination (optional for now)
+            // But strict requirement was just next/prev buttons.
+            // The search script needs to update the CONTAINER now.
+
+            let timeout = null;
+
+            if (searchInput) {
+                searchInput.addEventListener('input', function(e) {
+                    clearTimeout(timeout);
+                    const query = e.target.value;
+                    const url = new URL(window.location.href);
+                    
+                    if (query) {
+                        url.searchParams.set('search', query);
+                        url.searchParams.set('page', 1); // Reset to page 1 on search
+                    } else {
+                        url.searchParams.delete('search');
+                    }
+                    window.history.replaceState({}, '', url);
+
+                    timeout = setTimeout(() => {
+                        fetch(url, {
+                            headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                        })
+                        .then(response => response.text())
+                        .then(html => {
+                            document.getElementById('tenants-container').innerHTML = html;
+                        })
+                        .catch(err => console.error('Search failed:', err));
+                    }, 300);
+                });
+            }
+        });
+    </script>
+</div>
 </div>
 {% endblock %}

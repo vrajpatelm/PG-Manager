@@ -21,10 +21,10 @@
           </div>
           
           <div class="flex items-center gap-3">
-              <button class="bg-white hover:bg-gray-50 text-slate-700 px-4 py-2.5 rounded-xl border border-gray-200 shadow-sm font-medium text-sm transition-colors">
+              <button type="button" onclick="submitForm('draft')" class="bg-white hover:bg-gray-50 text-slate-700 px-4 py-2.5 rounded-xl border border-gray-200 shadow-sm font-medium text-sm transition-colors">
                   Save Draft
               </button>
-              <button class="btn-primary hover:shadow-lg hover:-translate-y-0.5 transition-all text-white px-6 py-2.5 rounded-xl font-bold text-sm shadow-brand1/20 shadow-lg">
+              <button type="button" onclick="submitForm('onboard')" class="btn-primary hover:shadow-lg hover:-translate-y-0.5 transition-all text-white px-6 py-2.5 rounded-xl font-bold text-sm shadow-brand1/20 shadow-lg">
                   Onboard Tenant
               </button>
           </div>
@@ -54,7 +54,8 @@
       {% endwith %}
 
       <!-- Form Grid -->
-      <form method="POST" action="{{ url_for('main.owner_add_tenant') }}" class="grid grid-cols-1 lg:grid-cols-3 gap-8 max-w-7xl mx-auto">
+      <form id="addTenantForm" method="POST" action="{{ url_for('main.owner_add_tenant') }}" class="grid grid-cols-1 lg:grid-cols-3 gap-8 max-w-7xl mx-auto">
+          <input type="hidden" name="action" id="formAction" value="onboard">
           
           <!-- Column 1: Personal Info & Photo -->
           <div class="flex flex-col gap-6">
@@ -123,11 +124,17 @@
                        <p class="text-sm text-slate-400 mb-2">Ready to onboard?</p>
                        <p class="text-xs text-slate-500">This will verify the email and allow the tenant to create an account linked to your property.</p>
                    </div>
-                   <button type="submit" class="w-full bg-white text-slate-900 font-bold py-3 rounded-xl hover:bg-gray-50 transition-colors shadow-lg">Confirm Onboarding</button>
+                   <button type="button" onclick="submitForm('onboard')" class="w-full bg-white text-slate-900 font-bold py-3 rounded-xl hover:bg-gray-50 transition-colors shadow-lg">Confirm Onboarding</button>
                </div>
           </div>
           
       </form>
 
 </div>
+<script>
+    function submitForm(action) {
+        document.getElementById('formAction').value = action;
+        document.getElementById('addTenantForm').submit();
+    }
+</script>
 {% endblock %}
