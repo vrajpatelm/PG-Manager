@@ -746,8 +746,8 @@ def owner_properties():
             rooms = []
             for room in room_rows:
                 r_id = room[0]
-                # Count current tenants in this room (Exclude Drafts/Past)
-                cur.execute("SELECT COUNT(*) FROM tenants WHERE room_id = %s AND onboarding_status IN ('ACTIVE', 'PENDING', 'NOTICE')", (r_id,))
+                # Count current tenants in this room (Include ACTIVE, PENDING, NOTICE, DRAFT)
+                cur.execute("SELECT COUNT(*) FROM tenants WHERE room_id = %s AND onboarding_status IN ('ACTIVE', 'PENDING', 'NOTICE', 'DRAFT')", (r_id,))
                 occupancy = cur.fetchone()[0]
                 
                 capacity = room[3]
@@ -874,3 +874,103 @@ def edit_room():
         conn.close()
         
     return redirect(url_for('main.owner_properties'))
+
+from datetime import datetime
+
+@bp.route('/owner/payments')
+def owner_payments():
+    if session.get('role') != 'OWNER': return redirect(url_for('main.login'))
+    
+    conn = get_db_connection()
+    cur = conn.cursor()
+    
+    # Defaults
+    current_date = datetime.now()
+    current_month_str = current_date.strftime('%Y-%m')
+    current_month_name = current_date.strftime('%B %Y')
+    
+    try:
+        cur.execute("SELECT id FROM owners WHERE user_id = %s", (session.get('user_id'),))
+        owner_id = cur.fetchone()[0]
+        
+        # Fetch Active Tenants & Check Payment Status for Current Month
+        cur.execute("""
+            SELECT t.id, t.full_name, t.room_number, t.monthly_rent,
+                   p.amount, p.payment_date
+            FROM tenants t
+            LEFT JOIN payments p ON t.id = p.tenant_id AND p.payment_month = %s AND p.status = 'COMPLETED'
+            WHERE t.owner_id = %s AND t.onboarding_status IN ('ACTIVE', 'NOTICE')
+            ORDER BY t.room_number
+        """, (current_month_str, owner_id))
+        
+        rows = cur.fetchall()
+        tenants = []
+        for row in rows:
+            is_paid = row[4] is not None
+            tenants.append({
+                'id': row[0],
+                'name': row[1],
+                'room': row[2],
+                'rent': int(row[3]),
+                'payment_status': 'PAID' if is_paid else 'PENDING',
+                'paid_amount': row[4],
+                'paid_date': row[5].strftime('%d %b') if row[5] else None
+            })
+            
+        cur.close()
+        conn.close()
+        
+        return render_template('owner/payments.html', 
+                             tenants=tenants, 
+                             current_month_name=current_month_name,
+                             current_date=current_date.strftime('%Y-%m-%d'))
+                             
+    except Exception as e:
+        print(f"Error fetching payments: {e}")
+        return render_template('owner/payments.html', tenants=[], current_month_name=current_month_name)
+
+@bp.route('/owner/record-payment', methods=['POST'])
+def owner_record_payment():
+    if session.get('role') != 'OWNER': return redirect(url_for('main.login'))
+    
+    tenant_id = request.form.get('tenant_id')
+    amount = request.form.get('amount')
+    payment_date_str = request.form.get('payment_date')
+    mode = request.form.get('payment_mode')
+    remarks = request.form.get('remarks')
+    
+    # Derive month from date
+    payment_date = datetime.strptime(payment_date_str, '%Y-%m-%d')
+    payment_month = payment_date.strftime('%Y-%m')
+    
+    conn = get_db_connection()
+    cur = conn.cursor()
+    try:
+        # Verify Tenant Ownership
+        cur.execute("""
+            SELECT id FROM tenants 
+            WHERE id = %s AND owner_id = (SELECT id FROM owners WHERE user_id = %s)
+        """, (tenant_id, session.get('user_id')))
+        
+        if not cur.fetchone():
+            flash("Invalid Tenant", "error")
+            return redirect(url_for('main.owner_payments'))
+
+        # Insert Payment
+        cur.execute("""
+            INSERT INTO payments (tenant_id, amount, payment_date, payment_month, status, payment_mode, remarks)
+            VALUES (%s, %s, %s, %s, 'COMPLETED', %s, %s)
+        """, (tenant_id, amount, payment_date, payment_month, mode, remarks))
+        
+        conn.commit()
+        flash("Payment recorded successfully!", "success")
+        
+    except Exception as e:
+        conn.rollback()
+        print(f"Error recording payment: {e}")
+        flash("Failed to record payment", "error")
+    finally:
+        cur.close()
+        conn.close()
+        
+    return redirect(url_for('main.owner_payments'))

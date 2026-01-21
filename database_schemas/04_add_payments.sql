@@ -6,6 +6,8 @@ CREATE TABLE IF NOT EXISTS payments (
     payment_date DATE DEFAULT CURRENT_DATE,
     payment_month VARCHAR(7), -- Format: 'YYYY-MM'
     status VARCHAR(20) DEFAULT 'COMPLETED', -- 'COMPLETED', 'PENDING', 'FAILED'
+    payment_mode VARCHAR(50),
+    remarks TEXT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
