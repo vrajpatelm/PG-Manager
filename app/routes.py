@@ -203,7 +203,42 @@ def owner_dashboard():
         occupancy_rotation = int((occupancy_rate / 100) * 360)
         occupancy_rotation_style = f"transform: rotate({occupancy_rotation}deg);"
         
-        # Use previous month dummy data for "vs last month" comparison for now
+        # 4. Rent Collection Stats (Current Month)
+        from datetime import datetime
+        current_month = datetime.now().strftime('%Y-%m')
+        
+        # Total Expected Rent (Sum of monthly_reny from Active Tenants)
+        cur.execute("""
+            SELECT COUNT(*), COALESCE(SUM(monthly_rent), 0) 
+            FROM tenants 
+            WHERE owner_id = %s AND onboarding_status = 'ACTIVE'
+        """, (owner_id,))
+        stats_row = cur.fetchone()
+        
+        total_active_tenants = stats_row[0] or 0
+        total_expected_rent = stats_row[1] or 0
+        
+        # Total Collected (Payments this month)
+        cur.execute("""
+            SELECT COUNT(DISTINCT tenant_id), COALESCE(SUM(amount), 0)
+            FROM payments
+            JOIN tenants ON payments.tenant_id = tenants.id
+            WHERE tenants.owner_id = %s AND payment_month = %s
+        """, (owner_id, current_month))
+        payment_row = cur.fetchone()
+        
+        tenants_paid = payment_row[0] or 0
+        total_collected = payment_row[1] or 0
+        
+        tenants_pending = max(0, total_active_tenants - tenants_paid)
+        
+        # Progress Calculation
+        if total_active_tenants > 0:
+            collection_percentage = int((tenants_paid / total_active_tenants) * 100)
+        else:
+            collection_percentage = 0
+            
+        rent_collection_style = f"width: {collection_percentage}%;"
         
         return render_template('owner/dashboard.html', 
                              name=session.get('name', 'Owner'),
@@ -214,7 +249,12 @@ def owner_dashboard():
                              occupancy_rotation=occupancy_rotation,
                              occupancy_rotation_style=occupancy_rotation_style,
                              available_beds=available_beds,
-                             total_occupied=total_tenants)
+                             total_occupied=total_tenants,
+                             # Rent Collection Data
+                             tenants_paid=tenants_paid,
+                             tenants_pending=tenants_pending,
+                             collection_percentage=collection_percentage,
+                             rent_collection_style=rent_collection_style)
                              
     except Exception as e:
         print(f"Error dashboard stats: {e}")
