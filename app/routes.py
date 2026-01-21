@@ -239,6 +239,32 @@ def owner_dashboard():
             collection_percentage = 0
             
         rent_collection_style = f"width: {collection_percentage}%;"
+
+         # 5. Lease Expiries (Next 30 Days)
+        from datetime import timedelta
+        thirty_days_later = datetime.now().date() + timedelta(days=30)
+        
+        cur.execute("""
+            SELECT full_name, lease_end, 
+                   (lease_end - CURRENT_DATE) as days_remaining 
+            FROM tenants 
+            WHERE owner_id = %s 
+              AND lease_end BETWEEN CURRENT_DATE AND %s
+              AND onboarding_status = 'ACTIVE'
+            ORDER BY lease_end ASC
+            LIMIT 5
+        """, (owner_id, thirty_days_later))
+        expiring_leases = cur.fetchall()
+        
+        # 6. New Movements (Recent Check-ins in last 30 days)
+        cur.execute("""
+            SELECT full_name, room_number, created_at
+            FROM tenants
+            WHERE owner_id = %s 
+            ORDER BY created_at DESC
+            LIMIT 3
+        """, (owner_id,))
+        recent_movements = cur.fetchall()
         
         return render_template('owner/dashboard.html', 
                              name=session.get('name', 'Owner'),
@@ -254,7 +280,9 @@ def owner_dashboard():
                              tenants_paid=tenants_paid,
                              tenants_pending=tenants_pending,
                              collection_percentage=collection_percentage,
-                             rent_collection_style=rent_collection_style)
+                             rent_collection_style=rent_collection_style,
+                             expiring_leases=expiring_leases,
+                             recent_movements=recent_movements)
                              
     except Exception as e:
         print(f"Error dashboard stats: {e}")

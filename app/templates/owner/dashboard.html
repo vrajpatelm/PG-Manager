@@ -313,40 +313,53 @@
                </div>
 
                <!-- Lease Expiries -->
+                <!-- Lease Expiries -->
                <div class="bg-white rounded-3xl p-6 border border-gray-100 shadow-sm">
                     <h3 class="text-base font-bold text-slate-900 mb-3">Lease Expiries <span class="text-xs font-normal text-slate-400 ml-1">(Next 30 Days)</span></h3>
                     <ul class="space-y-3">
-                         <li class="flex items-center justify-between">
-                             <div class="flex items-center gap-2">
-                                <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Alice" class="w-8 h-8 rounded-full bg-gray-50">
-                                <span class="text-sm font-medium text-slate-700">Alice Smith</span>
-                             </div>
-                             <span class="text-xs font-bold text-red-500 bg-red-50 px-2 py-1 rounded">5 Days</span>
-                         </li>
-                         <li class="flex items-center justify-between">
-                             <div class="flex items-center gap-2">
-                                <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Bob" class="w-8 h-8 rounded-full bg-gray-50">
-                                <span class="text-sm font-medium text-slate-700">Bob Jones</span>
-                             </div>
-                             <span class="text-xs font-bold text-orange-500 bg-orange-50 px-2 py-1 rounded">12 Days</span>
-                         </li>
+                        {% if not expiring_leases %}
+                             <li class="text-center py-4">
+                                 <p class="text-sm text-slate-400">No leases expiring soon.</p>
+                             </li>
+                        {% else %}
+                             {% for tenant in expiring_leases %}
+                             <li class="flex items-center justify-between">
+                                 <div class="flex items-center gap-2">
+                                    <img src="https://api.dicebear.com/7.x/avataaars/svg?seed={{ tenant[0] }}" class="w-8 h-8 rounded-full bg-gray-50">
+                                    <span class="text-sm font-medium text-slate-700">{{ tenant[0] }}</span>
+                                 </div>
+                                 <span class="text-xs font-bold {% if tenant[2] <= 7 %}text-red-500 bg-red-50{% else %}text-orange-500 bg-orange-50{% endif %} px-2 py-1 rounded">
+                                     {{ tenant[2] }} Days
+                                 </span>
+                             </li>
+                             {% endfor %}
+                        {% endif %}
                     </ul>
                </div>
 
                <!-- New Check-ins -->
+               <!-- New Check-ins -->
                <div class="bg-white rounded-3xl p-6 border border-gray-100 shadow-sm">
                     <h3 class="text-base font-bold text-slate-900 mb-3">New Movements</h3>
                     <div class="space-y-3">
-                         <div class="flex items-start gap-3">
-                             <div class="w-8 h-8 rounded-lg bg-green-100 text-green-600 flex items-center justify-center shrink-0">
-                                 <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" /></svg>
+                        {% if not recent_movements %}
+                             <div class="text-center py-4">
+                                 <p class="text-sm text-slate-400">No recent activity.</p>
                              </div>
-                             <div>
-                                 <p class="text-sm font-bold text-slate-800">New Check-in</p>
-                                 <p class="text-xs text-slate-500">Sarah Connor - Room 101</p>
-                                 <span class="text-[10px] text-slate-400">Today, 2:00 PM</span>
+                        {% else %}
+                             {% for movement in recent_movements %}
+                             <div class="flex items-start gap-3">
+                                 <div class="w-8 h-8 rounded-lg bg-green-100 text-green-600 flex items-center justify-center shrink-0">
+                                     <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" /></svg>
+                                 </div>
+                                 <div>
+                                     <p class="text-sm font-bold text-slate-800">New Check-in</p>
+                                     <p class="text-xs text-slate-500">{{ movement[0] }} - Room {{ movement[1] }}</p>
+                                     <span class="text-[10px] text-slate-400">{{ movement[2].strftime('%b %d, %I:%M %p') }}</span>
+                                 </div>
                              </div>
-                         </div>
+                             {% endfor %}
+                        {% endif %}
                     </div>
                </div>
            </div>
