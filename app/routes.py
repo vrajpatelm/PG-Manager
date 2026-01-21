@@ -181,15 +181,55 @@ def time_ago(date):
 def owner_dashboard():
     if session.get('role') != 'OWNER': return redirect(url_for('main.login'))
     
+    # Import datetime here to ensure it's available
+    from datetime import datetime, timedelta, timezone
+    
     conn = get_db_connection()
-    if not conn: return render_template('owner/dashboard.html', name=session.get('name', 'Owner'), total_income=0)
+    if not conn: 
+        return render_template('owner/dashboard.html', 
+                             name=session.get('name', 'Owner'),
+                             total_income=0,
+                             total_spent=0,
+                             net_profit=0,
+                             occupancy_rate=0,
+                             occupancy_rotation=0,
+                             occupancy_rotation_style="transform: rotate(0deg);",
+                             available_beds=0,
+                             total_occupied=0,
+                             tenants_paid=0,
+                             tenants_pending=0,
+                             collection_percentage=0,
+                             rent_collection_style="width: 0%;",
+                             expiring_leases=[],
+                             recent_movements=[],
+                             pending_complaints=[],
+                             high_priority_count=0,
+                             recent_activity=[])
     
     cur = conn.cursor()
     try:
         cur.execute("SELECT id FROM owners WHERE user_id = %s", (session.get('user_id'),))
         owner_row = cur.fetchone()
         if not owner_row:
-             return render_template('owner/dashboard.html', name=session.get('name', 'Owner'), total_income=0)
+             return render_template('owner/dashboard.html', 
+                                  name=session.get('name', 'Owner'),
+                                  total_income=0,
+                                  total_spent=0,
+                                  net_profit=0,
+                                  occupancy_rate=0,
+                                  occupancy_rotation=0,
+                                  occupancy_rotation_style="transform: rotate(0deg);",
+                                  available_beds=0,
+                                  total_occupied=0,
+                                  tenants_paid=0,
+                                  tenants_pending=0,
+                                  collection_percentage=0,
+                                  rent_collection_style="width: 0%;",
+                                  expiring_leases=[],
+                                  recent_movements=[],
+                                  pending_complaints=[],
+                                  high_priority_count=0,
+                                  recent_activity=[])
         
         owner_id = owner_row[0]
         
@@ -197,8 +237,12 @@ def owner_dashboard():
         cur.execute("SELECT SUM(monthly_rent) FROM tenants WHERE owner_id = %s AND onboarding_status = 'ACTIVE'", (owner_id,))
         total_income = cur.fetchone()[0] or 0
         
-        # Placeholder for Expenses (Not implemented yet)
-        total_spent = 0
+        # 2. Calculate Total Spent (Sum of expenses for current month)
+        cur.execute("""
+            SELECT SUM(amount) FROM expenses 
+            WHERE owner_id = %s AND expense_month = %s
+        """, (owner_id, datetime.now().strftime('%Y-%m')))
+        total_spent = cur.fetchone()[0] or 0
         
         net_profit = total_income - total_spent
         
@@ -227,7 +271,6 @@ def owner_dashboard():
         occupancy_rotation_style = f"transform: rotate({occupancy_rotation}deg);"
         
         # 4. Rent Collection Stats (Current Month)
-        from datetime import datetime
         current_month = datetime.now().strftime('%Y-%m')
         
         # Total Expected Rent (Sum of monthly_reny from Active Tenants)
@@ -264,7 +307,6 @@ def owner_dashboard():
         rent_collection_style = f"width: {collection_percentage}%;"
 
          # 5. Lease Expiries (Next 30 Days)
-        from datetime import timedelta
         thirty_days_later = datetime.now().date() + timedelta(days=30)
         
         cur.execute("""
@@ -314,9 +356,9 @@ def owner_dashboard():
         high_priority_count = cur.fetchone()[0] or 0
 
         # 8. Recent Activity Feed (Aggregated)
+        # (This query remains the same as previously viewed)
         cur.execute("""
             SELECT type, title, description, created_at, metadata FROM (
-                -- Payments
                 SELECT 'PAYMENT' as type, 
                        'Rent Received' as title, 
                        'From ' || t.full_name || ' (₹' || p.amount || ')' as description, 
@@ -328,7 +370,6 @@ def owner_dashboard():
                 
                 UNION ALL
                 
-                -- New Tenants
                 SELECT 'MOVEMENT' as type, 
                        'New Tenant' as title, 
                        full_name || ' joined Room ' || room_number as description, 
@@ -339,7 +380,6 @@ def owner_dashboard():
                 
                 UNION ALL
                 
-                -- Complaints
                 SELECT 'COMPLAINT' as type, 
                        'New Complaint' as title, 
                        title || ' in Room ' || (SELECT room_number FROM tenants WHERE id = complaints.tenant_id) as description, 
@@ -363,7 +403,6 @@ def owner_dashboard():
                              occupancy_rotation_style=occupancy_rotation_style,
                              available_beds=available_beds,
                              total_occupied=total_tenants,
-                             # Rent Collection Data
                              tenants_paid=tenants_paid,
                              tenants_pending=tenants_pending,
                              collection_percentage=collection_percentage,
@@ -376,7 +415,25 @@ def owner_dashboard():
                              
     except Exception as e:
         print(f"Error dashboard stats: {e}")
-        return render_template('owner/dashboard.html', name=session.get('name', 'Owner'), total_income=0)
+        return render_template('owner/dashboard.html', 
+                             name=session.get('name', 'Owner'),
+                             total_income=0,
+                             total_spent=0,
+                             net_profit=0,
+                             occupancy_rate=0,
+                             occupancy_rotation=0,
+                             occupancy_rotation_style="transform: rotate(0deg);",
+                             available_beds=0,
+                             total_occupied=0,
+                             tenants_paid=0,
+                             tenants_pending=0,
+                             collection_percentage=0,
+                             rent_collection_style="width: 0%;",
+                             expiring_leases=[],
+                             recent_movements=[],
+                             pending_complaints=[],
+                             high_priority_count=0,
+                             recent_activity=[])
     finally:
         cur.close()
         conn.close()
@@ -877,8 +934,8 @@ def edit_room():
 
 from datetime import datetime
 
-@bp.route('/owner/payments')
-def owner_payments():
+@bp.route('/owner/finance')
+def owner_finance():
     if session.get('role') != 'OWNER': return redirect(url_for('main.login'))
     
     conn = get_db_connection()
@@ -893,7 +950,7 @@ def owner_payments():
         cur.execute("SELECT id FROM owners WHERE user_id = %s", (session.get('user_id'),))
         owner_id = cur.fetchone()[0]
         
-        # Fetch Active Tenants & Check Payment Status for Current Month
+        # 1. Fetch Income (Tenants)
         cur.execute("""
             SELECT t.id, t.full_name, t.room_number, t.monthly_rent,
                    p.amount, p.payment_date
@@ -903,31 +960,63 @@ def owner_payments():
             ORDER BY t.room_number
         """, (current_month_str, owner_id))
         
-        rows = cur.fetchall()
+        income_rows = cur.fetchall()
         tenants = []
-        for row in rows:
+        total_income = 0
+        
+        for row in income_rows:
             is_paid = row[4] is not None
+            paid_amount = row[4] if is_paid else 0
+            total_income += paid_amount
+            
             tenants.append({
                 'id': row[0],
                 'name': row[1],
                 'room': row[2],
                 'rent': int(row[3]),
                 'payment_status': 'PAID' if is_paid else 'PENDING',
-                'paid_amount': row[4],
+                'paid_amount': paid_amount,
                 'paid_date': row[5].strftime('%d %b') if row[5] else None
+            })
+
+        # 2. Fetch Expenses
+        cur.execute("""
+            SELECT id, category, amount, description, expense_date 
+            FROM expenses 
+            WHERE owner_id = %s AND expense_month = %s
+            ORDER BY expense_date DESC
+        """, (owner_id, current_month_str))
+        
+        expense_rows = cur.fetchall()
+        expenses = []
+        total_expenses = 0
+        
+        for row in expense_rows:
+            amount = row[2]
+            total_expenses += amount
+            expenses.append({
+                'id': row[0],
+                'category': row[1],
+                'amount': amount,
+                'description': row[3],
+                'date': row[4].strftime('%d %b')
             })
             
         cur.close()
         conn.close()
         
-        return render_template('owner/payments.html', 
-                             tenants=tenants, 
+        return render_template('owner/finance.html', 
+                             tenants=tenants,
+                             expenses=expenses,
+                             total_income=total_income,
+                             total_expenses=total_expenses,
+                             net_profit=total_income - total_expenses,
                              current_month_name=current_month_name,
                              current_date=current_date.strftime('%Y-%m-%d'))
                              
     except Exception as e:
-        print(f"Error fetching payments: {e}")
-        return render_template('owner/payments.html', tenants=[], current_month_name=current_month_name)
+        print(f"Error fetching finance data: {e}")
+        return render_template('owner/finance.html', tenants=[], expenses=[], current_month_name=current_month_name)
 
 @bp.route('/owner/record-payment', methods=['POST'])
 def owner_record_payment():
@@ -939,32 +1028,18 @@ def owner_record_payment():
     mode = request.form.get('payment_mode')
     remarks = request.form.get('remarks')
     
-    # Derive month from date
     payment_date = datetime.strptime(payment_date_str, '%Y-%m-%d')
     payment_month = payment_date.strftime('%Y-%m')
     
     conn = get_db_connection()
     cur = conn.cursor()
     try:
-        # Verify Tenant Ownership
-        cur.execute("""
-            SELECT id FROM tenants 
-            WHERE id = %s AND owner_id = (SELECT id FROM owners WHERE user_id = %s)
-        """, (tenant_id, session.get('user_id')))
-        
-        if not cur.fetchone():
-            flash("Invalid Tenant", "error")
-            return redirect(url_for('main.owner_payments'))
-
-        # Insert Payment
         cur.execute("""
             INSERT INTO payments (tenant_id, amount, payment_date, payment_month, status, payment_mode, remarks)
             VALUES (%s, %s, %s, %s, 'COMPLETED', %s, %s)
         """, (tenant_id, amount, payment_date, payment_month, mode, remarks))
-        
         conn.commit()
-        flash("Payment recorded successfully!", "success")
-        
+        flash("Payment recorded!", "success")
     except Exception as e:
         conn.rollback()
         print(f"Error recording payment: {e}")
@@ -973,4 +1048,39 @@ def owner_record_payment():
         cur.close()
         conn.close()
         
-    return redirect(url_for('main.owner_payments'))
+    return redirect(url_for('main.owner_finance'))
+
+@bp.route('/owner/add-expense', methods=['POST'])
+def owner_add_expense():
+    if session.get('role') != 'OWNER': return redirect(url_for('main.login'))
+    
+    category = request.form.get('category')
+    amount = request.form.get('amount')
+    date_str = request.form.get('expense_date')
+    description = request.form.get('description')
+    
+    expense_date = datetime.strptime(date_str, '%Y-%m-%d')
+    expense_month = expense_date.strftime('%Y-%m')
+    
+    conn = get_db_connection()
+    cur = conn.cursor()
+    try:
+        cur.execute("SELECT id FROM owners WHERE user_id = %s", (session.get('user_id'),))
+        owner_id = cur.fetchone()[0]
+
+        cur.execute("""
+            INSERT INTO expenses (owner_id, category, amount, description, expense_date, expense_month)
+            VALUES (%s, %s, %s, %s, %s, %s)
+        """, (owner_id, category, amount, description, expense_date, expense_month))
+        
+        conn.commit()
+        flash("Expense added!", "success")
+    except Exception as e:
+        conn.rollback()
+        print(f"Error adding expense: {e}")
+        flash("Failed to add expense", "error")
+    finally:
+        cur.close()
+        conn.close()
+        
+    return redirect(url_for('main.owner_finance'))

@@ -1,0 +1,53 @@
+<!-- Record Expense Modal -->
+<div id="expenseModal" class="fixed inset-0 z-50 hidden">
+    <!-- Backdrop -->
+    <div class="absolute inset-0 bg-slate-900/40 backdrop-blur-sm transition-opacity" 
+         onclick="document.getElementById('expenseModal').classList.add('hidden')"></div>
+    
+    <!-- Modal Content -->
+    <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-md p-4">
+        <div class="bg-white rounded-3xl shadow-2xl p-6 transform transition-all scale-100">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-xl font-bold text-slate-900">Add New Expense</h3>
+                <button onclick="document.getElementById('expenseModal').classList.add('hidden')" class="p-2 rounded-full hover:bg-gray-100 text-slate-400 hover:text-slate-600 transition-colors">
+                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+                </button>
+            </div>
+            
+            <form action="{{ url_for('main.owner_add_expense') }}" method="POST" class="space-y-4">
+                
+                <div>
+                   <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5">Category</label>
+                   <select name="category" required class="w-full px-4 py-3 rounded-xl border border-gray-200 bg-white focus:border-brand1 focus:ring-4 focus:ring-brand1/10 outline-none font-medium text-slate-700">
+                       <option value="UTILITIES">Utilities (Electricity, Water, WiFi)</option>
+                       <option value="MAINTENANCE">Maintenance & Repairs</option>
+                       <option value="SALARY">Staff Salaries</option>
+                       <option value="MARKETING">Marketing & Brokerage</option>
+                       <option value="FOOD">Food & Groceries</option>
+                       <option value="OTHER">Other</option>
+                   </select>
+                </div>
+
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                         <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5">Amount (₹)</label>
+                         <input type="number" name="amount" required class="w-full px-4 py-3 rounded-xl border border-gray-200 bg-white focus:border-brand1 focus:ring-4 focus:ring-brand1/10 outline-none font-bold text-slate-900">
+                    </div>
+                    <div>
+                         <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5">Date</label>
+                         <input type="date" name="expense_date" value="{{ current_date }}" required class="w-full px-4 py-3 rounded-xl border border-gray-200 bg-white focus:border-brand1 focus:ring-4 focus:ring-brand1/10 outline-none font-medium text-slate-700">
+                    </div>
+                </div>
+                
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5">Description</label>
+                    <textarea name="description" rows="2" placeholder="e.g. October Electricity Bill" required class="w-full px-4 py-3 rounded-xl border border-gray-200 bg-white focus:border-brand1 focus:ring-4 focus:ring-brand1/10 outline-none font-medium text-slate-700 text-sm"></textarea>
+                </div>
+                
+                <button type="submit" class="w-full py-3.5 bg-slate-900 text-white rounded-xl font-bold text-lg shadow-lg hover:bg-slate-800 transition-all mt-2">
+                    Save Expense
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
