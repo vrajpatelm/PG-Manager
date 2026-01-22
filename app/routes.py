@@ -14,9 +14,8 @@ def index():
     if 'user_id' in session:
         if session.get('role') == 'OWNER':
             return redirect(url_for('main.owner_dashboard'))
-        else:
-             # Placeholder for Tenant Dashboard
-            return render_template("index.html") # Temp
+        elif session.get('role') == 'TENANT':
+             return redirect(url_for('main.tenant_dashboard'))
             
     return render_template("index.html")
 
@@ -57,8 +56,7 @@ def login():
                     if owner: session['name'] = owner[0]
                     return redirect(url_for('main.owner_dashboard'))
             elif user[2] == 'TENANT':
-                    # Placeholder logic
-                    return redirect(url_for('main.index')) 
+                    return redirect(url_for('main.tenant_dashboard')) 
                 
         except Exception as e:
             print(e)
@@ -141,7 +139,7 @@ def signup():
                 session['user_id'] = user_id
                 session['role'] = 'TENANT'
                 session['name'] = name
-                return redirect(url_for('main.index'))
+                return redirect(url_for('main.tenant_dashboard'))
 
         except Exception as e:
             conn.rollback()
@@ -1413,3 +1411,9 @@ def resolve_complaint(complaint_id):
         conn.close()
         
     return redirect(url_for('main.owner_complaints', status='PENDING'))
+
+
+@bp.route('/tenant/dashboard')
+def tenant_dashboard():
+    if session.get('role') != 'TENANT': return redirect(url_for('main.login'))
+    return render_template('tenant/dashboard.html')
