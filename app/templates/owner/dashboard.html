@@ -139,18 +139,18 @@
       </nav>
 
       <!-- User Profile (Bottom) -->
-      <div class="p-4 m-4 mt-0 bg-white/40 rounded-2xl border border-white/50 backdrop-blur-sm">
+      <div class="p-4 m-4 mt-0 bg-white/40 rounded-2xl border border-white/50 backdrop-blur-sm relative group">
           <div class="flex items-center gap-3">
-              <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Felix" alt="User" class="w-10 h-10 rounded-full border-2 border-white shadow-sm bg-gray-100">
+              <img src="https://api.dicebear.com/7.x/avataaars/svg?seed={{ name or 'User' }}" alt="User" class="w-10 h-10 rounded-full border-2 border-white shadow-sm bg-gray-100">
               <div class="flex-1 min-w-0">
-                  <p class="text-sm font-bold text-slate-800 truncate">John Owner</p>
-                  <p class="text-xs text-slate-500 truncate">Premium Plan</p>
+                  <p class="text-sm font-bold text-slate-800 truncate">{{ name or session['name'] or 'Owner' }}</p>
+                  <p class="text-xs text-slate-500 truncate">Owner Account</p>
               </div>
-              <button class="text-slate-400 hover:text-red-500 transition-colors">
+               <a href="{{ url_for('main.logout') }}" class="p-2 rounded-lg hover:bg-white text-slate-400 hover:text-red-500 transition-colors" title="Logout">
                   <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
                   </svg>
-              </button>
+              </a>
           </div>
       </div>
   </aside>

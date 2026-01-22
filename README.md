@@ -1,48 +1,41 @@
-# PG-Manager
+# PG-Manager 🏠
 
-This repository now includes a minimal Flask application skeleton and helper scripts to get you started locally.
+**PG-Manager** is a modern, comprehensive Property Management System (PMS) designed for Hostel and Paying Guest (PG) owners. It simplifies the chaos of managing tenants, rooms, payments, and complaints into a single, beautiful dashboard.
 
-## Quick Start (Windows)
+## 🚀 Key Features
 
-1. Create virtual environment and install dependencies:
+*   **Role-Based Access**: Secure login/signup for Owners and Tenants.
+*   **Tenant Management**: Onboard new tenants, track lease dates, and manage active/past residents.
+*   **Smart Room Allocation**: Visual bed management with capacity tracking.
+*   **Finance Dashboard**: 
+    *   Track Rent Payments (Cash, UPI, Bank).
+    *   Record Expenses (Utilities, Maintenance, Salaries).
+    *   Real-time **Net Profit** calculation.
+*   **Complaint System**: Tenant-raised issues with priority tracking (High/Medium/Low) and resolution workflow.
+*   **Properties & Rooms**: Manage multiple buildings and configure room capacity/pricing.
+*   **Responsive Design**: Built with Tailwind CSS for a seamless mobile and desktop experience.
 
-   ```powershell
-   .\scripts\setup.ps1
-   ```
+## 🛠️ Tech Stack
 
-2. Copy `.env.example` to `.env` if you need to override defaults.
+*   **Backend**: Python, Flask, Jinja2
+*   **Database**: PostgreSQL
+*   **Frontend**: HTML5, Tailwind CSS, JavaScript
+*   **Authentication**: Werkzeug Security
 
-3. Run the app:
+## 📚 Documentation
 
-   ```powershell
-   .\scripts\run.ps1
-   ```
+*   **[Setup Guide](SETUP.md)**: Step-by-step instructions to install and run the project locally.
+*   **[Contributing](CONTRIBUTING.md)**: Guidelines for code contributions and pull requests.
 
-4. Open http://127.0.0.1:5000/ to see the test JSON response.
+## ⚡ Quick Start
 
-## VS Code
+1.  **Clone** the repo.
+2.  **Setup** database and environment variables (Detailed in [SETUP.md](SETUP.md)).
+3.  **Run**:
+    ```bash
+    npm run dev
+    ```
 
-- Use the **Run Flask** task (Tasks > Run Task > Run Flask), or
-- Use the debug configuration **Python: Flask (run.py)** in the Run and Debug panel.
+## 📄 License
 
-## Tailwind CSS
-
-This project uses Tailwind CLI for the frontend. To build Tailwind CSS:
-
-```powershell
-npm install
-npm run build:css   # one-time build
-npm run watch:css   # development watch mode
-```
-
-You can also run backend + frontend with one command:
-
-```powershell
-# Activate your Python venv first so `python` points to the venv interpreter
-.\venv\Scripts\Activate.ps1   # or .\.venv\Scripts\Activate.ps1
-npm run dev
-```
-
-The compiled CSS is written to `app/static/css/tailwind.css` and is included by `app/templates/index.html`.
-
-For more details, see `FLASK_SETUP.md`.
+This project is open-source and available under the [MIT License](LICENSE).
