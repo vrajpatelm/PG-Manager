@@ -21,10 +21,10 @@
           </div>
           
           <div class="flex items-center gap-3">
-              <button type="button" onclick="submitForm('draft')" class="bg-white hover:bg-gray-50 text-slate-700 px-4 py-2.5 rounded-xl border border-gray-200 shadow-sm font-medium text-sm transition-colors">
+              <button type="submit" form="addTenantForm" name="action" value="draft" class="bg-white hover:bg-gray-50 text-slate-700 px-4 py-2.5 rounded-xl border border-gray-200 shadow-sm font-medium text-sm transition-colors">
                   Save Draft
               </button>
-              <button type="button" onclick="submitForm('onboard')" class="btn-primary hover:shadow-lg hover:-translate-y-0.5 transition-all text-white px-6 py-2.5 rounded-xl font-bold text-sm shadow-brand1/20 shadow-lg">
+              <button type="submit" form="addTenantForm" name="action" value="onboard" class="btn-primary hover:shadow-lg hover:-translate-y-0.5 transition-all text-white px-6 py-2.5 rounded-xl font-bold text-sm shadow-brand1/20 shadow-lg">
                   Onboard Tenant
               </button>
           </div>
@@ -55,7 +55,7 @@
 
       <!-- Form Grid -->
       <form id="addTenantForm" method="POST" action="{{ url_for('main.owner_add_tenant') }}" class="grid grid-cols-1 lg:grid-cols-3 gap-8 max-w-7xl mx-auto">
-          <input type="hidden" name="action" id="formAction" value="onboard">
+          <!-- Removed hidden action input -->
           
           <!-- Column 1: Personal Info & Photo -->
           <div class="flex flex-col gap-6">
@@ -107,12 +107,12 @@
                    </div>
                    
                    <div>
-                       <label class="block text-sm font-bold text-slate-700 mb-1.5">Bed No. (Optional)</label>
-                        <input type="text" name="bed_no" placeholder="e.g. A" class="w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50 focus:bg-white focus:border-brand1 focus:ring-4 focus:ring-brand1/10 outline-none transition-all placeholder-gray-400 text-sm font-medium">
+                       <label class="block text-sm font-bold text-slate-700 mb-1.5">Bed No. *</label>
+                        <input type="text" name="bed_no" placeholder="e.g. A" required class="w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50 focus:bg-white focus:border-brand1 focus:ring-4 focus:ring-brand1/10 outline-none transition-all placeholder-gray-400 text-sm font-medium">
                    </div>
                    
                    <div>
-                       <label class="block text-sm font-bold text-slate-700 mb-1.5">Move-in Date</label>
+                       <label class="block text-sm font-bold text-slate-700 mb-1.5">Move-in Date *</label>
                         <input type="date" name="move_in_date" required class="w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50 focus:bg-white focus:border-brand1 focus:ring-4 focus:ring-brand1/10 outline-none transition-all text-sm font-medium text-slate-600">
                    </div>
                </div>
@@ -122,7 +122,7 @@
                    <h3 class="text-lg font-bold text-slate-900 border-b border-gray-100 pb-3 mb-2">Financials</h3>
                    
                    <div>
-                       <label class="block text-sm font-bold text-slate-700 mb-1.5">Monthly Rent</label>
+                       <label class="block text-sm font-bold text-slate-700 mb-1.5">Monthly Rent *</label>
                        <div class="relative">
                            <span class="absolute left-4 top-3 text-slate-400">₹</span>
                            <input type="number" name="rent" placeholder="0000" required class="w-full pl-8 pr-4 py-3 rounded-xl border border-gray-200 bg-gray-50 focus:bg-white focus:border-brand1 focus:ring-4 focus:ring-brand1/10 outline-none transition-all text-sm font-medium">
@@ -140,7 +140,7 @@
                        <p class="text-sm text-slate-400 mb-2">Ready to onboard?</p>
                        <p class="text-xs text-slate-500">This will verify the email and allow the tenant to create an account linked to your property.</p>
                    </div>
-                   <button type="button" onclick="submitForm('onboard')" class="w-full bg-white text-slate-900 font-bold py-3 rounded-xl hover:bg-gray-50 transition-colors shadow-lg">Confirm Onboarding</button>
+                   <button type="submit" name="action" value="onboard" class="w-full bg-white text-slate-900 font-bold py-3 rounded-xl hover:bg-gray-50 transition-colors shadow-lg">Confirm Onboarding</button>
                </div>
           </div>
           
@@ -148,10 +148,7 @@
 
 </div>
 <script>
-    function submitForm(action) {
-        document.getElementById('formAction').value = action;
-        document.getElementById('addTenantForm').submit();
-    }
+    // Removed submitForm function as use native form buttons
 </script>
    <script>
        document.addEventListener('DOMContentLoaded', function() {
