@@ -8,7 +8,8 @@ def create_app():
     app.secret_key = os.environ.get('SECRET_KEY') or 'dev_secret_key_change_in_production'
 
     # Register blueprints
-    from .routes import bp as main_bp
+    # Register blueprints
+    from .blueprints import bp as main_bp
     app.register_blueprint(main_bp)
 
     return app
