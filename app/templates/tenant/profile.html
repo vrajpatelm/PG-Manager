@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Payment History - PG-Manager</title>
+  <title>My Profile - PG-Manager</title>
   <!-- Tailwind & Custom CSS -->
   <link rel="stylesheet" href="/static/css/tailwind.css">
   <link rel="stylesheet" href="/static/css/custom.css">
@@ -46,7 +46,7 @@
               <span>Dashboard</span>
           </a>
 
-          <a href="{{ url_for('main.tenant_payments') }}" class="sidebar-link active flex items-center gap-3.5 px-4 py-3.5 rounded-xl font-medium text-slate-600 bg-brand1/10 text-brand1">
+          <a href="{{ url_for('main.tenant_payments') }}" class="sidebar-link flex items-center gap-3.5 px-4 py-3.5 rounded-xl font-medium text-slate-600">
               <svg class="w-5 h-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" /></svg>
               <span>Payments</span>
           </a>
@@ -56,7 +56,7 @@
               <span>Complaints</span>
           </a>
           
-          <a href="{{ url_for('main.tenant_profile') }}" class="sidebar-link flex items-center gap-3.5 px-4 py-3.5 rounded-xl font-medium text-slate-600">
+          <a href="{{ url_for('main.tenant_profile') }}" class="sidebar-link active flex items-center gap-3.5 px-4 py-3.5 rounded-xl font-medium text-slate-600 bg-brand1/10 text-brand1">
                <svg class="w-5 h-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
                <span>Profile</span>
            </a>
@@ -83,58 +83,75 @@
               <button id="sidebar-toggle" class="md:hidden p-2 rounded-lg bg-white/50 border border-gray-200 text-slate-600">
                   <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h7" /></svg>
               </button>
-              <h1 class="text-2xl md:text-3xl font-bold text-slate-900">Payment History</h1>
+              <h1 class="text-2xl md:text-3xl font-bold text-slate-900">My Profile</h1>
           </div>
-          <p class="text-slate-500 text-sm md:text-base">Record of your past rental payments and transactions.</p>
+          <p class="text-slate-500 text-sm md:text-base">View your details and update account security.</p>
       </header>
 
-      <div class="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden">
-          <div class="overflow-x-auto">
-              <table class="w-full text-left">
-                  <thead>
-                      <tr class="bg-gray-50 border-b border-gray-100 text-xs uppercase tracking-wider text-slate-500 font-bold">
-                          <th class="p-5">Date</th>
-                          <th class="p-5">Month</th>
-                          <th class="p-5">Reference ID</th>
-                          <th class="p-5 text-right">Amount</th>
-                          <th class="p-5 text-center">Status</th>
-                      </tr>
-                  </thead>
-                  <tbody class="divide-y divide-gray-100">
-                      {% for payment in payments %}
-                      <tr class="group hover:bg-slate-50 transition-colors">
-                          <td class="p-5 text-sm font-medium text-slate-600">{{ payment.date }}</td>
-                          <td class="p-5 text-sm font-bold text-slate-800">{{ payment.month }}</td>
-                          <td class="p-5 text-sm font-mono text-slate-500">{{ payment.remarks.replace('Txn Ref: ', '') }}</td>
-                          <td class="p-5 text-sm font-bold text-slate-900 text-right">₹{{ payment.amount }}</td>
-                          <td class="p-5 text-center">
-                              <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold
-                                  {% if payment.status == 'COMPLETED' %}bg-green-100 text-green-700
-                                  {% elif payment.status == 'PENDING' %}bg-indigo-50 text-indigo-700
-                                  {% else %}bg-red-50 text-red-700{% endif %}">
-                                  {% if payment.status == 'COMPLETED' %}
-                                    <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
-                                    Paid
-                                  {% elif payment.status == 'PENDING' %}
-                                    <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                                    Verifying
-                                  {% else %}
-                                    Failed
-                                  {% endif %}
-                              </span>
-                          </td>
-                      </tr>
-                      {% endfor %}
-                      {% if not payments %}
-                      <tr>
-                          <td colspan="5" class="p-12 text-center text-slate-400">
-                              <p class="font-medium">No payment records found.</p>
-                          </td>
-                      </tr>
-                      {% endif %}
-                  </tbody>
-              </table>
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+            <div class="mb-6 p-4 rounded-xl flex items-center gap-3 {% if category == 'success' %}bg-green-50 text-green-700{% else %}bg-red-50 text-red-700{% endif %}">
+                <p class="text-sm font-medium">{{ message }}</p>
+            </div>
+            {% endfor %}
+        {% endif %}
+      {% endwith %}
+
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          
+          <!-- Personal Info -->
+          <div class="space-y-6">
+              <div class="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm relative overflow-hidden">
+                   <!-- Decorative Cover -->
+                   <div class="absolute top-0 left-0 w-full h-24 bg-gradient-to-r from-slate-800 to-slate-900"></div>
+                   
+                   <div class="relative pt-12 text-center">
+                       <img src="https://api.dicebear.com/7.x/avataaars/svg?seed={{ profile.full_name }}" class="w-24 h-24 rounded-full bg-white border-4 border-white mx-auto shadow-md">
+                       <h2 class="mt-4 text-xl font-bold text-slate-900">{{ profile.full_name }}</h2>
+                       <p class="text-slate-500 text-sm">{{ profile.email }}</p>
+                   </div>
+                   
+                   <div class="mt-8 space-y-4">
+                       <div class="flex justify-between p-3 bg-gray-50 rounded-xl">
+                           <span class="text-sm font-bold text-slate-500">Room Number</span>
+                           <span class="text-sm font-mono font-bold text-slate-900">{{ profile.room }}</span>
+                       </div>
+                       <div class="flex justify-between p-3 bg-gray-50 rounded-xl">
+                           <span class="text-sm font-bold text-slate-500">Bed Number</span>
+                           <span class="text-sm font-mono font-bold text-slate-900">{{ profile.bed or 'Not Assigned' }}</span>
+                       </div>
+                       <div class="flex justify-between p-3 bg-gray-50 rounded-xl">
+                           <span class="text-sm font-bold text-slate-500">Move-in Date</span>
+                           <span class="text-sm font-mono font-bold text-slate-900">{{ profile.move_in or 'N/A' }}</span>
+                       </div>
+                   </div>
+              </div>
           </div>
+
+          <!-- Edit Form -->
+          <div class="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm">
+              <h3 class="text-lg font-bold text-slate-900 mb-6">Account Settings</h3>
+              
+              <form action="{{ url_for('main.tenant_update_profile') }}" method="POST" class="space-y-6">
+                  <!-- Phone -->
+                  <div class="space-y-2">
+                      <label class="block text-sm font-bold text-slate-700">Phone Number</label>
+                      <input type="tel" name="phone" value="{{ profile.phone }}" required class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-brand1/20 focus:border-brand1 font-medium text-slate-900">
+                  </div>
+                  
+                  <!-- Change Password -->
+                  <div class="space-y-2 pt-2 border-t border-gray-100">
+                      <label class="block text-sm font-bold text-slate-700 mt-4">New Password <span class="text-xs font-normal text-slate-400">(Leave blank to keep current)</span></label>
+                      <input type="password" name="password" placeholder="Min 6 characters" class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-brand1/20 focus:border-brand1 font-medium">
+                  </div>
+                  
+                  <button type="submit" class="w-full py-3.5 bg-brand1 text-white rounded-xl font-bold hover:opacity-90 transition-all shadow-lg shadow-brand1/20">
+                      Save Changes
+                  </button>
+              </form>
+          </div>
+
       </div>
 
   </main>

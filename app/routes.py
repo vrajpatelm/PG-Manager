@@ -660,6 +660,8 @@ def owner_add_tenant():
         phone = request.form.get('phone')
         room_no = request.form.get('room_no')
         rent = request.form.get('rent')
+        bed_no = request.form.get('bed_no')
+        move_in_date = request.form.get('move_in_date')
         
         # Simple Validation
         if not full_name or not email:
@@ -669,6 +671,10 @@ def owner_add_tenant():
         if not rent:
             flash("Monthly Rent is mandatory", "error")
             return redirect(url_for('main.owner_add_tenant'))
+            
+        if not move_in_date:
+            import datetime
+            move_in_date = datetime.date.today()
 
         user_id = session.get('user_id')
         
@@ -723,9 +729,9 @@ def owner_add_tenant():
 
             # Insert Tenant
             cur.execute("""
-                INSERT INTO tenants (owner_id, full_name, email, phone_number, room_number, room_id, monthly_rent, onboarding_status)
-                VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
-            """, (owner_id, full_name, email, phone, room_no, room_id, rent, status))
+                INSERT INTO tenants (owner_id, full_name, email, phone_number, room_number, room_id, monthly_rent, onboarding_status, bed_number, lease_start)
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+            """, (owner_id, full_name, email, phone, room_no, room_id, rent, status, bed_no, move_in_date))
             
             conn.commit()
             if status == 'DRAFT':
@@ -1709,6 +1715,76 @@ def tenant_qr_code(tenant_id):
     buf.seek(0)
     
     return send_file(buf, mimetype='image/png')
+
+@bp.route('/tenant/profile')
+def tenant_profile():
+    if session.get('role') != 'TENANT': return redirect(url_for('main.login'))
+    
+    user_id = session.get('user_id')
+    
+    conn = get_db_connection()
+    cur = conn.cursor()
+    try:
+        cur.execute("""
+            SELECT t.full_name, t.email, t.phone_number, t.room_number, t.bed_number, t.lease_start
+            FROM tenants t
+            WHERE t.user_id = %s
+        """, (user_id,))
+        tenant = cur.fetchone()
+        
+        if not tenant:
+            return "Tenant not found", 404
+            
+        profile = {
+            'full_name': tenant[0],
+            'email': tenant[1],
+            'phone': tenant[2],
+            'room': tenant[3],
+            'bed': tenant[4],
+            'move_in': tenant[5]
+        }
+            
+        return render_template('tenant/profile.html', profile=profile, session=session)
+        
+    except Exception as e:
+        print(f"Error fetching profile: {e}")
+        return redirect(url_for('main.tenant_dashboard'))
+    finally:
+        cur.close()
+        conn.close()
+
+@bp.route('/tenant/profile/update', methods=['POST'])
+def tenant_update_profile():
+    if session.get('role') != 'TENANT': return redirect(url_for('main.login'))
+    
+    phone = request.form.get('phone')
+    password = request.form.get('password')
+    user_id = session.get('user_id')
+    
+    conn = get_db_connection()
+    cur = conn.cursor()
+    try:
+        # Update Phone
+        cur.execute("UPDATE tenants SET phone_number = %s WHERE user_id = %s", (phone, user_id))
+        
+        # Update Password if provided
+        if password:
+            hashed_pw = generate_password_hash(password)
+            cur.execute("UPDATE users SET password_hash = %s WHERE id = %s", (hashed_pw, user_id))
+            flash("Profile and password updated!", "success")
+        else:
+            flash("Profile updated successfully!", "success")
+            
+        conn.commit()
+    except Exception as e:
+        conn.rollback()
+        print(f"Error updating profile: {e}")
+        flash("Failed to update profile", "error")
+    finally:
+        cur.close()
+        conn.close()
+        
+    return redirect(url_for('main.tenant_profile'))
 
 @bp.route('/tenant/payments')
 def tenant_payments():
