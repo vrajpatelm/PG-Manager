@@ -1,195 +1,14 @@
-
-import os
 import json
-import uuid
+import io
 import psycopg2
-from flask import Blueprint, jsonify, redirect, render_template, request, url_for, session, flash
-from werkzeug.security import generate_password_hash, check_password_hash
-from werkzeug.utils import secure_filename
+from datetime import datetime, timedelta, timezone, date as d
+from flask import render_template, request, redirect, url_for, session, flash, Response, send_file
 from app.database.database import get_db_connection
-
-bp = Blueprint("main", __name__)
-
-@bp.route("/")
-def index():
-    if 'user_id' in session:
-        if session.get('role') == 'OWNER':
-            return redirect(url_for('main.owner_dashboard'))
-        elif session.get('role') == 'TENANT':
-             return redirect(url_for('main.tenant_dashboard'))
-            
-    return render_template("index.html")
-
-
-@bp.route('/login', methods=['GET', 'POST'])
-def login():
-    if request.method == 'POST':
-        email = request.form.get('email')
-        password = request.form.get('password')
-        
-        conn = get_db_connection()
-        if not conn:
-            flash('Database connection error', 'error')
-            return render_template('login.html')
-            
-        cur = conn.cursor()
-        try:
-            # Check User
-            cur.execute("SELECT id, password_hash, role FROM users WHERE email = %s", (email,))
-            user = cur.fetchone()
-            
-            if not user:
-                flash('User does not exist. Please Sign Up first.', 'error')
-                return render_template('login.html')
-            
-            if not check_password_hash(user[1], password):
-                flash('Incorrect password. Please try again.', 'error')
-                return render_template('login.html')
-
-            # Login Success
-            session['user_id'] = user[0]
-            session['role'] = user[2]
-            
-            # Get Name
-            if user[2] == 'OWNER':
-                    cur.execute("SELECT full_name FROM owners WHERE user_id = %s", (user[0],))
-                    owner = cur.fetchone()
-                    if owner: session['name'] = owner[0]
-                    return redirect(url_for('main.owner_dashboard'))
-            elif user[2] == 'TENANT':
-                    return redirect(url_for('main.tenant_dashboard')) 
-                
-        except Exception as e:
-            print(e)
-            flash('An error occurred during login', 'error')
-        finally:
-            cur.close()
-            conn.close()
-            
-    return render_template('login.html')
-
-
-@bp.route('/signup', methods=['GET', 'POST'])
-def signup():
-    if request.method == 'POST':
-        name = request.form.get('name')
-        email = request.form.get('email')
-        password = request.form.get('password')
-        role = request.form.get('role') # 'OWNER' or 'TENANT'
-        
-        if not role:
-            flash("Please form role", "error") # Should be hidden input, but safety check
-            return redirect(url_for('main.signup'))
-
-        hashed_pw = generate_password_hash(password)
-        
-        conn = get_db_connection()
-        if not conn:
-            flash("Database Error", "error")
-            return redirect(url_for('main.signup'))
-            
-        cur = conn.cursor()
-        try:
-            # Check if email already taken
-            cur.execute("SELECT id FROM users WHERE email = %s", (email,))
-            if cur.fetchone():
-                flash("Email already registered. Please Login instead.", "error")
-                return redirect(url_for('main.signup'))
-
-            if role == 'OWNER':
-                # ... (Owner creation logic remains same) ...
-                cur.execute(
-                    "INSERT INTO users (email, password_hash, role) VALUES (%s, %s, 'OWNER') RETURNING id",
-                    (email, hashed_pw)
-                )
-                user_id = cur.fetchone()[0]
-                cur.execute("INSERT INTO owners (user_id, full_name) VALUES (%s, %s)", (user_id, name))
-                conn.commit()
-                
-                session['user_id'] = user_id
-                session['role'] = 'OWNER'
-                session['name'] = name
-                return redirect(url_for('main.owner_dashboard'))
-
-            elif role == 'TENANT':
-                # 1. Verify Invitation
-                cur.execute("SELECT id, owner_id, onboarding_status FROM tenants WHERE email = %s", (email,))
-                tenant_record = cur.fetchone()
-                
-                if not tenant_record:
-                    # Specific Error as requested
-                    flash("You are not associated with any PG. Please verify your email or contact your PG Owner.", "error")
-                    return redirect(url_for('main.signup'))
-                    
-                tenant_id = tenant_record[0]
-                status = tenant_record[2]
-                
-                if status == 'DRAFT':
-                    flash("Your admission is still in Draft. Please ask your Owner to finalize it.", "error")
-                    return redirect(url_for('main.signup'))
-                
-                # ... (Tenant creation logic remains same) ...
-                cur.execute(
-                    "INSERT INTO users (email, password_hash, role) VALUES (%s, %s, 'TENANT') RETURNING id",
-                    (email, hashed_pw)
-                )
-                user_id = cur.fetchone()[0]
-                cur.execute("UPDATE tenants SET user_id = %s, onboarding_status = 'ACTIVE' WHERE id = %s", (user_id, tenant_id))
-                conn.commit()
-                
-                session['user_id'] = user_id
-                session['role'] = 'TENANT'
-                session['name'] = name
-                return redirect(url_for('main.tenant_dashboard'))
-
-        except Exception as e:
-            conn.rollback()
-            print(f"Signup Error: {e}")
-            flash("Registration failed. Please try again.", "error")
-        finally:
-            cur.close()
-            conn.close()
-
-    return render_template('signup.html')
-
-
-@bp.route('/logout')
-def logout():
-    session.clear()
-    return redirect(url_for('main.login'))
-
-
-# --- Owner Routes ---
-
-@bp.app_template_filter('time_ago')
-def time_ago(date):
-    if not date: return ''
-    from datetime import datetime, timezone, date as d
-    
-    # Handle datetime.date objects (no time)
-    if not isinstance(date, datetime) and isinstance(date, d):
-        date = datetime.combine(date, datetime.min.time())
-        
-    now = datetime.now(timezone.utc) if date.tzinfo else datetime.now()
-    
-    diff = now - date
-    seconds = diff.total_seconds()
-    
-    if seconds < 60:
-        return 'Just now'
-    elif seconds < 3600:
-        return f'{int(seconds // 60)} mins ago'
-    elif seconds < 86400:
-        return f'{int(seconds // 3600)} hours ago'
-    else:
-        return f'{int(seconds // 86400)} days ago'
+from . import bp
 
 @bp.route('/owner/dashboard')
 def owner_dashboard():
     if session.get('role') != 'OWNER': return redirect(url_for('main.login'))
-    
-    # Import datetime here to ensure it's available
-    from datetime import datetime, timedelta, timezone
     
     conn = get_db_connection()
     if not conn: 
@@ -241,11 +60,9 @@ def owner_dashboard():
         
         owner_id = owner_row[0]
         
-        # Calculate Total Monthly Potential Income (Sum of rents of ACTIVE tenants only)
         cur.execute("SELECT SUM(monthly_rent) FROM tenants WHERE owner_id = %s AND onboarding_status = 'ACTIVE'", (owner_id,))
         total_income = cur.fetchone()[0] or 0
         
-        # 2. Calculate Total Spent (Sum of expenses for current month)
         cur.execute("""
             SELECT SUM(amount) FROM expenses 
             WHERE owner_id = %s AND expense_month = %s
@@ -254,8 +71,6 @@ def owner_dashboard():
         
         net_profit = total_income - total_spent
         
-        # Calculate Occupancy
-        # 1. Total Capacity (Sum of all beds in all rooms of this owner)
         cur.execute("""
             SELECT SUM(capacity) 
             FROM rooms 
@@ -264,11 +79,9 @@ def owner_dashboard():
         capacity_row = cur.fetchone()
         total_capacity = capacity_row[0] or 0
         
-        # 2. Total Tenants (Occupied Beds - Exclude Drafts/Past)
         cur.execute("SELECT COUNT(*) FROM tenants WHERE owner_id = %s AND onboarding_status IN ('ACTIVE', 'PENDING', 'NOTICE')", (owner_id,))
         total_tenants = cur.fetchone()[0] or 0
         
-        # 3. Calculate Stats
         if total_capacity > 0:
             occupancy_rate = int((total_tenants / total_capacity) * 100)
         else:
@@ -278,10 +91,8 @@ def owner_dashboard():
         occupancy_rotation = int((occupancy_rate / 100) * 360)
         occupancy_rotation_style = f"transform: rotate({occupancy_rotation}deg);"
         
-        # 4. Rent Collection Stats (Current Month)
         current_month = datetime.now().strftime('%Y-%m')
         
-        # Total Expected Rent (Sum of monthly_reny from Active Tenants)
         cur.execute("""
             SELECT COUNT(*), COALESCE(SUM(monthly_rent), 0) 
             FROM tenants 
@@ -292,8 +103,6 @@ def owner_dashboard():
         total_active_tenants = stats_row[0] or 0
         total_expected_rent = stats_row[1] or 0
         
-        # Total Collected (Payments this month)
-        # Total Collected (Payments this month - COMPLETED ONLY)
         cur.execute("""
             SELECT COUNT(DISTINCT tenant_id), COALESCE(SUM(amount), 0)
             FROM payments
@@ -307,7 +116,6 @@ def owner_dashboard():
         
         tenants_pending = max(0, total_active_tenants - tenants_paid)
         
-        # Progress Calculation
         if total_expected_rent > 0:
             collection_percentage = int((total_collected / total_expected_rent) * 100)
         else:
@@ -315,7 +123,6 @@ def owner_dashboard():
             
         rent_collection_style = f"width: {collection_percentage}%;"
 
-        # 5. Fetch Pending Payments & Approvals
         cur.execute("""
             SELECT p.id, t.full_name, p.amount, p.payment_date, p.remarks, t.room_number 
             FROM payments p
@@ -326,11 +133,9 @@ def owner_dashboard():
         """, (owner_id,))
         pending_approvals = cur.fetchall()
         
-        # Count total pending for "View All" link
         cur.execute("SELECT COUNT(*) FROM payments p JOIN tenants t ON p.tenant_id = t.id WHERE t.owner_id = %s AND p.status = 'PENDING'", (owner_id,))
         total_pending_count = cur.fetchone()[0] or 0
 
-         # 5. Lease Expiries (Next 30 Days)
         thirty_days_later = datetime.now().date() + timedelta(days=30)
         
         cur.execute("""
@@ -345,7 +150,6 @@ def owner_dashboard():
         """, (owner_id, thirty_days_later))
         expiring_leases = cur.fetchall()
         
-        # 6. New Movements (Recent Check-ins in last 30 days)
         cur.execute("""
             SELECT full_name, room_number, created_at
             FROM tenants
@@ -355,7 +159,6 @@ def owner_dashboard():
         """, (owner_id,))
         recent_movements = cur.fetchall()
         
-        # 7. Pending Complaints (High Priority First)
         cur.execute("""
             SELECT c.title, t.room_number, t.full_name, c.priority, c.description
             FROM complaints c
@@ -372,15 +175,12 @@ def owner_dashboard():
         """, (owner_id,))
         pending_complaints = cur.fetchall()
         
-        # Count total high priority pending
         cur.execute("""
             SELECT COUNT(*) FROM complaints 
             WHERE owner_id = %s AND status = 'PENDING' AND priority = 'HIGH'
         """, (owner_id,))
         high_priority_count = cur.fetchone()[0] or 0
 
-        # 8. Recent Activity Feed (Aggregated)
-        # (This query remains the same as previously viewed)
         cur.execute("""
             SELECT type, title, description, created_at, metadata FROM (
                 SELECT 'PAYMENT' as type, 
@@ -516,10 +316,8 @@ def owner_tenants():
         cur.execute("SELECT id FROM owners WHERE user_id = %s", (session.get('user_id'),))
         owner_id = cur.fetchone()[0]
         
-        # Fetch Tenants
         filter_type = request.args.get('filter', 'all')
         
-        # Base Query
         query = """
             SELECT id, full_name, email, phone_number, room_number, 
                    onboarding_status, monthly_rent, created_at 
@@ -528,13 +326,10 @@ def owner_tenants():
         """
         params = [owner_id]
         
-        # Apply Filters
         if filter_type == 'active':
             query += " AND onboarding_status = 'ACTIVE'"
         elif filter_type == 'rent-due':
-            # Active tenants who strictly haven't paid properly for the current month
-            import datetime
-            current_month = datetime.datetime.now().strftime('%Y-%m')
+            current_month = datetime.now().strftime('%Y-%m')
             query += """ 
                 AND onboarding_status = 'ACTIVE'
                 AND id NOT IN (
@@ -544,12 +339,10 @@ def owner_tenants():
             """
             params.append(current_month)
         elif filter_type == 'lease-expiring':
-            # Expiring in next 30 days
             query += " AND onboarding_status = 'ACTIVE' AND lease_end BETWEEN CURRENT_DATE AND CURRENT_DATE + INTERVAL '30 days'"
         elif filter_type == 'past':
             query += " AND onboarding_status IN ('EXITED', 'LEFT', 'MOVED_OUT', 'REJECTED')"
         
-        # Apply Search
         search_query = request.args.get('search')
         if search_query:
             query += " AND (full_name ILIKE %s OR email ILIKE %s OR room_number ILIKE %s)"
@@ -558,23 +351,19 @@ def owner_tenants():
         
         query += " ORDER BY created_at DESC"
         
-        # --- PAGINATION ---
         page = request.args.get('page', 1, type=int)
         per_page = 3
         offset = (page - 1) * per_page
         
-        # Count Total Matches (for this filter/search)
         count_query = f"SELECT COUNT(*) FROM ({query}) AS sub"
         cur.execute(count_query, tuple(params))
         total_count = cur.fetchone()[0]
         
-        # Add LIMIT/OFFSET
         query += " LIMIT %s OFFSET %s"
         params.extend([per_page, offset])
         
         cur.execute(query, tuple(params))
         
-        # Convert to list of dicts for template
         rows = cur.fetchall()
         tenants = []
         for row in rows:
@@ -601,16 +390,9 @@ def owner_tenants():
             'per_page': per_page
         }
 
-        # Check for AJAX request
         if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
              return render_template('owner/partials/tenant_list_with_pagination.html', tenants=tenants, pagination=pagination)
 
-        # Stats (Need separate query independent of pagination/filtering?)
-        # For now, stats are global or per filter? Let's keep stats global for the top cards.
-        # But wait, original code did stats calculation on `tenants` list. Now `tenants` is paginated.
-        # We need to fetch global stats separately to keep the top cards accurate.
-        
-        # Global Tenant Count
         cur.execute("SELECT COUNT(*) FROM tenants WHERE owner_id = %s", (owner_id,))
         global_total = cur.fetchone()[0]
         
@@ -620,8 +402,7 @@ def owner_tenants():
         cur.execute("SELECT COUNT(*) FROM tenants WHERE owner_id = %s AND onboarding_status = 'NOTICE'", (owner_id,))
         global_notice = cur.fetchone()[0]
 
-        import datetime
-        current_month = datetime.datetime.now().strftime('%Y-%m')
+        current_month = datetime.now().strftime('%Y-%m')
         cur.execute("""
             SELECT COUNT(DISTINCT tenant_id) FROM payments 
             WHERE payment_month = %s AND status = 'COMPLETED'
@@ -663,7 +444,6 @@ def owner_add_tenant():
         bed_no = request.form.get('bed_no')
         move_in_date = request.form.get('move_in_date')
         
-        # Simple Validation
         if not full_name or not email:
             flash("Name and Email are required", "error")
             return redirect(url_for('main.owner_add_tenant'))
@@ -673,7 +453,6 @@ def owner_add_tenant():
             return redirect(url_for('main.owner_add_tenant'))
             
         if not move_in_date:
-            import datetime
             move_in_date = datetime.date.today()
 
         user_id = session.get('user_id')
@@ -685,7 +464,6 @@ def owner_add_tenant():
             
         cur = conn.cursor()
         try:
-             # Get Owner ID
             cur.execute("SELECT id FROM owners WHERE user_id = %s", (user_id,))
             owner_row = cur.fetchone()
             if not owner_row:
@@ -694,31 +472,26 @@ def owner_add_tenant():
             
             owner_id = owner_row[0]
             
-            # 1. Check if email already invited (Global or Owner specific? Unique Constraint is per Owner)
             cur.execute("SELECT id FROM tenants WHERE email = %s AND owner_id = %s", (email, owner_id))
             if cur.fetchone():
                 flash(f"Tenant with email '{email}' already exists.", "error")
                 return redirect(url_for('main.owner_add_tenant'))
                 
-            # 1.5 Check if email already registered in system (as User/Owner)
             cur.execute("SELECT id, role FROM users WHERE email = %s", (email,))
             existing_user = cur.fetchone()
             if existing_user:
                 flash(f"Email '{email}' is already registered as a {existing_user[1]}. Cannot add as new tenant.", "error")
                 return redirect(url_for('main.owner_add_tenant'))
 
-            # 2. Check if Phone Number already exists
             if phone:
                 cur.execute("SELECT id FROM tenants WHERE phone_number = %s AND owner_id = %s", (phone, owner_id))
                 if cur.fetchone():
                     flash(f"Tenant with phone number '{phone}' is already added.", "error")
                     return redirect(url_for('main.owner_add_tenant'))
                 
-            # Determine Status
             action = request.form.get('action')
             status = 'DRAFT' if action == 'draft' else 'PENDING'
             
-            # Lookup Room ID
             cur.execute("""
                 SELECT r.id FROM rooms r
                 JOIN properties p ON r.property_id = p.id
@@ -727,7 +500,6 @@ def owner_add_tenant():
             room_row = cur.fetchone()
             room_id = room_row[0] if room_row else None
 
-            # Insert Tenant
             cur.execute("""
                 INSERT INTO tenants (owner_id, full_name, email, phone_number, room_number, room_id, monthly_rent, onboarding_status, bed_number, lease_start)
                 VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
@@ -744,7 +516,6 @@ def owner_add_tenant():
         except Exception as e:
             conn.rollback()
             print(f"Error adding tenant: {e}")
-            # Try to give a hint if it's a database constraint issue that wasn't caught
             if "unique constraint" in str(e).lower():
                  flash("A record with this email or ID already exists.", "error")
             else:
@@ -759,7 +530,6 @@ def owner_add_tenant():
         cur.execute("SELECT id FROM owners WHERE user_id = %s", (session.get('user_id'),))
         owner_id = cur.fetchone()[0]
         
-        # Fetch Rooms with Availability
         cur.execute("""
             SELECT r.id, r.room_number, r.capacity, r.rent_amount,
                    (SELECT COUNT(*) FROM tenants t WHERE t.room_id = r.id AND t.onboarding_status IN ('ACTIVE', 'PENDING', 'NOTICE')) as current_occupancy
@@ -809,9 +579,8 @@ def owner_settings():
         if not owner_row: return redirect(url_for('main.login'))
         
         owner_id = owner_row[0]
-        # Determine QR URL: Use DB route if data exists, else fallback to old URL logic
         qr_url = owner_row[10]
-        if owner_row[11]: # If BLOB data exists
+        if owner_row[11]:
              qr_url = url_for('main.owner_qr_image', owner_id=owner_id)
 
         owner = {
@@ -827,7 +596,6 @@ def owner_settings():
             'qr_code_url': qr_url
         }
         
-        # Fetch Property Details (Assuming single property for now)
         cur.execute("""
             SELECT id, wifi_ssid, wifi_password, gate_closing_time, 
                    breakfast_start_time, breakfast_end_time, house_rules,
@@ -854,7 +622,6 @@ def owner_settings():
         
     except Exception as e:
         print(f"Error fetching settings: {e}")
-        # Return object with minimal required fields to prevent template crash
         return render_template('owner/settings.html', owner={'preferences': {}}, property={})
     finally:
         cur.close()
@@ -864,11 +631,9 @@ def owner_settings():
 def owner_settings_update():
     if session.get('role') != 'OWNER': return redirect(url_for('main.login'))
     
-    # Helper to clean empty strings to None
     def clean(val):
         return val if val and val.strip() != "" else None
 
-    # Helper for integers (default to 0 if invalid/empty)
     def clean_int(val, default=0):
         try:
             if not val or val.strip() == "": return default
@@ -876,33 +641,27 @@ def owner_settings_update():
         except ValueError:
             return default
 
-    # 1. Profile Data
     full_name = clean(request.form.get('full_name'))
     phone_number = clean(request.form.get('phone_number'))
     
-    # 2. Billing Data
     upi_id = clean(request.form.get('upi_id'))
     account_holder = clean(request.form.get('account_holder_name'))
     bank_name = clean(request.form.get('bank_name'))
     account_number = clean(request.form.get('account_number'))
     ifsc_code = clean(request.form.get('ifsc_code'))
     
-    # Integers
     late_fee = clean_int(request.form.get('late_fee_daily'), 0)
     grace_period = clean_int(request.form.get('rent_grace_period_days'), 5)
     
-    # 3. Property Rules
     wifi_ssid = clean(request.form.get('wifi_ssid'))
     wifi_password = clean(request.form.get('wifi_password'))
     
-    # Time Fields (Must be None if empty, else Postgres errs)
     gate_closing = clean(request.form.get('gate_closing_time'))
     breakfast_start = clean(request.form.get('breakfast_start_time'))
     breakfast_end = clean(request.form.get('breakfast_end_time'))
     
     house_rules = clean(request.form.get('house_rules'))
     
-    # 4. Preferences
     email_alerts = 'on' in request.form if 'email_alerts' in request.form else False
     sms_alerts = 'on' in request.form if 'sms_alerts' in request.form else False
     dark_mode = 'on' in request.form if 'dark_mode' in request.form else False
@@ -919,15 +678,12 @@ def owner_settings_update():
         cur.execute("SELECT id FROM owners WHERE user_id = %s", (session.get('user_id'),))
         owner_id = cur.fetchone()[0]
         
-        # QR Code Upload Handling (Database Storage)
         qr_binary = None
         if 'qr_code' in request.files:
             file = request.files['qr_code']
             if file and file.filename != '':
-                qr_binary = file.read() # Read file into memory
+                qr_binary = file.read() 
                 
-        # Update Owner
-        # Dynamic SQL: Update blob if present
         if qr_binary:
             cur.execute("""
                 UPDATE owners 
@@ -948,8 +704,6 @@ def owner_settings_update():
             """, (full_name, phone_number, upi_id, account_holder, bank_name, 
                   account_number, ifsc_code, preferences, owner_id))
               
-        # Update Property
-        # Check if property exists first, if not create one
         cur.execute("SELECT id FROM properties WHERE owner_id = %s", (owner_id,))
         if cur.fetchone():
             cur.execute("""
@@ -985,8 +739,6 @@ def export_tenants():
     if session.get('role') != 'OWNER': return redirect(url_for('main.login'))
     
     import csv
-    import io
-    from flask import Response
     
     conn = get_db_connection()
     cur = conn.cursor()
@@ -994,7 +746,6 @@ def export_tenants():
         cur.execute("SELECT id FROM owners WHERE user_id = %s", (session.get('user_id'),))
         owner_id = cur.fetchone()[0]
         
-        # Fetch Tenant Data (Real)
         cur.execute("""
             SELECT full_name, email, phone_number, room_number, 
                    monthly_rent, security_deposit, onboarding_status, 
@@ -1006,18 +757,13 @@ def export_tenants():
         
         rows = cur.fetchall()
         
-        # Create CSV in memory
         output = io.StringIO()
         writer = csv.writer(output)
         
-        # Header
         writer.writerow(['Full Name', 'Email', 'Phone', 'Room', 'Rent', 'Deposit', 'Status', 'Lease Start', 'Lease End'])
         
-        # Data
         for row in rows:
-            # Convert row to list to modify
             row_list = list(row)
-            # Prepend ' to phone number (index 2) to force Excel string format
             if row_list[2]:
                 row_list[2] = f"'{row_list[2]}" 
             writer.writerow(row_list)
@@ -1038,9 +784,6 @@ def export_tenants():
 
 @bp.route('/owner/qr-image/<owner_id>')
 def owner_qr_image(owner_id):
-    import io
-    from flask import send_file
-    
     conn = get_db_connection()
     cur = conn.cursor()
     try:
@@ -1108,7 +851,6 @@ def owner_properties():
         cur.execute("SELECT id FROM owners WHERE user_id = %s", (session.get('user_id'),))
         owner_id = cur.fetchone()[0]
         
-        # 1. Fetch Properties
         cur.execute("SELECT id, name, address FROM properties WHERE owner_id = %s", (owner_id,))
         prop_rows = cur.fetchall()
         
@@ -1116,7 +858,6 @@ def owner_properties():
         for prop_row in prop_rows:
             prop_id = prop_row[0]
             
-            # 2. Fetch Rooms for this property
             cur.execute("""
                 SELECT id, room_number, floor_number, capacity, rent_amount 
                 FROM rooms WHERE property_id = %s ORDER BY room_number
@@ -1126,7 +867,6 @@ def owner_properties():
             rooms = []
             for room in room_rows:
                 r_id = room[0]
-                # Count current tenants in this room (Include ACTIVE, PENDING, NOTICE, DRAFT)
                 cur.execute("SELECT COUNT(*) FROM tenants WHERE room_id = %s AND onboarding_status IN ('ACTIVE', 'PENDING', 'NOTICE', 'DRAFT')", (r_id,))
                 occupancy = cur.fetchone()[0]
                 
@@ -1176,11 +916,9 @@ def add_room():
         cur.execute("SELECT id FROM owners WHERE user_id = %s", (session.get('user_id'),))
         owner_id = cur.fetchone()[0]
         
-        # Get default property (assume single property for now)
         cur.execute("SELECT id FROM properties WHERE owner_id = %s", (owner_id,))
         prop_row = cur.fetchone()
         if not prop_row:
-             # Create one if missing safety net
              cur.execute("INSERT INTO properties (owner_id) VALUES (%s) RETURNING id", (owner_id,))
              property_id = cur.fetchone()[0]
         else:
@@ -1221,7 +959,6 @@ def edit_room():
     conn = get_db_connection()
     cur = conn.cursor()
     try:
-        # Verify ownership via property
         cur.execute("""
             SELECT r.id FROM rooms r
             JOIN properties p ON r.property_id = p.id
@@ -1255,8 +992,6 @@ def edit_room():
         
     return redirect(url_for('main.owner_properties'))
 
-from datetime import datetime
-
 @bp.route('/owner/finance')
 def owner_finance():
     if session.get('role') != 'OWNER': return redirect(url_for('main.login'))
@@ -1264,7 +999,6 @@ def owner_finance():
     conn = get_db_connection()
     cur = conn.cursor()
     
-    # Defaults
     current_date = datetime.now()
     current_month_str = current_date.strftime('%Y-%m')
     current_month_name = current_date.strftime('%B %Y')
@@ -1273,7 +1007,6 @@ def owner_finance():
         cur.execute("SELECT id FROM owners WHERE user_id = %s", (session.get('user_id'),))
         owner_id = cur.fetchone()[0]
         
-        # 1. Fetch Income (Tenants)
         cur.execute("""
             SELECT t.id, t.full_name, t.room_number, t.monthly_rent,
                    p.amount, p.payment_date
@@ -1302,7 +1035,6 @@ def owner_finance():
                 'paid_date': row[5].strftime('%d %b') if row[5] else None
             })
 
-        # 2. Fetch Expenses
         cur.execute("""
             SELECT id, category, amount, description, expense_date 
             FROM expenses 
@@ -1325,7 +1057,6 @@ def owner_finance():
                 'date': row[4].strftime('%d %b')
             })
             
-        # Fetch Pending Approvals (ALL)
         cur.execute("""
             SELECT p.id, t.full_name, p.amount, p.payment_date, p.remarks, t.room_number, p.created_at 
             FROM payments p
@@ -1502,331 +1233,3 @@ def resolve_complaint(complaint_id):
         conn.close()
         
     return redirect(url_for('main.owner_complaints', status='PENDING'))
-
-
-@bp.route('/tenant/dashboard')
-def tenant_dashboard():
-    if session.get('role') != 'TENANT': return redirect(url_for('main.login'))
-    
-    conn = get_db_connection()
-    cur = conn.cursor()
-    try:
-        # Fetch Tenant Details
-        cur.execute("""
-            SELECT t.id, t.full_name, t.room_number, t.bed_number, t.phone_number, t.email, t.monthly_rent, t.onboarding_status
-            FROM tenants t
-            WHERE t.user_id = %s
-        """, (session.get('user_id'),))
-        tenant = cur.fetchone()
-        
-        if not tenant:
-            flash("Tenant record not found.", "error")
-            return redirect(url_for('main.login'))
-
-        # Check Rent Status for Current Month
-        from datetime import datetime
-        current_month = datetime.now().strftime('%Y-%m')
-        
-        cur.execute("""
-            SELECT status FROM payments 
-            WHERE tenant_id = %s AND payment_month = %s
-            ORDER BY created_at DESC LIMIT 1
-        """, (tenant[0], current_month))
-        
-        payment_record = cur.fetchone()
-        
-        rent_status = 'UNPAID'
-        if payment_record:
-            status_val = payment_record[0]
-            if status_val == 'COMPLETED':
-                rent_status = 'PAID'
-            elif status_val == 'PENDING':
-                rent_status = 'VERIFYING'
-            
-        # Fetch Owner Payment Details
-        cur.execute("""
-            SELECT o.upi_id, o.id 
-            FROM owners o 
-            JOIN tenants t ON t.owner_id = o.id 
-            WHERE t.id = %s
-        """, (tenant[0],))
-        owner_details = cur.fetchone()
-        
-        tenant_data = {
-            'id': tenant[0],
-            'full_name': tenant[1],
-            'room_number': tenant[2],
-            'bed_number': tenant[3],
-            'phone': tenant[4],
-            'email': tenant[5],
-            'rent': tenant[6],
-            'status': tenant[7],
-            'rent_status': rent_status,
-            'owner_upi': owner_details[0] if owner_details else None,
-            'owner_id': owner_details[1] if owner_details else None
-        }
-
-        return render_template('tenant/dashboard.html', tenant=tenant_data)
-    except Exception as e:
-        return render_template('tenant/dashboard.html',
-                         tenant=tenant_data,
-                         current_date=datetime.now())
-    finally:
-        cur.close()
-        conn.close()
-
-@bp.route('/tenant/pay', methods=['POST'])
-def tenant_pay_rent():
-    if session.get('role') != 'TENANT': return redirect(url_for('main.login'))
-
-    amount = request.form['amount']
-    txn_id = request.form['transaction_id']
-    tenant_id = request.form['tenant_id']
-    payment_month = datetime.now().strftime('%Y-%m') # Current month payment
-
-    conn = get_db_connection()
-    cur = conn.cursor()
-    try:
-        # Check if already paid/pending for this month to prevent duplicates
-        cur.execute("""
-            SELECT id FROM payments
-            WHERE tenant_id = %s AND payment_month = %s AND status IN ('COMPLETED', 'PENDING')
-        """, (tenant_id, payment_month))
-
-        if cur.fetchone():
-            flash("Payment for this month is already recorded or pending.", "warning")
-            return redirect(url_for('main.tenant_dashboard'))
-
-        # Fetch Owner ID from Tenant
-        cur.execute("SELECT owner_id FROM tenants WHERE id = %s", (tenant_id,))
-        owner_id = cur.fetchone()[0]
-
-        cur.execute("""
-            INSERT INTO payments (id, tenant_id, amount, payment_date, payment_month, payment_mode, remarks, status)
-            VALUES (%s, %s, %s, CURRENT_DATE, %s, 'UPI', %s, 'PENDING')
-        """, (str(uuid.uuid4()), tenant_id, amount, payment_month, f"Txn Ref: {txn_id}"))
-
-        conn.commit()
-        flash("Payment submitted for verification!", "success")
-
-    except Exception as e:
-        conn.rollback()
-        print(f"Error submitting payment: {e}")
-        flash("Failed to submit payment.", "error")
-    finally:
-        cur.close()
-        conn.close()
-
-    return redirect(url_for('main.tenant_dashboard'))
-
-@bp.route('/tenant/complaints')
-def tenant_complaints():
-    if session.get('role') != 'TENANT': return redirect(url_for('main.login'))
-
-    user_id = session.get('user_id')
-
-    conn = get_db_connection()
-    cur = conn.cursor()
-    try:
-        # Get Tenant ID
-        cur.execute("SELECT id, full_name, email FROM tenants WHERE user_id = %s", (user_id,))
-        tenant = cur.fetchone()
-
-        if not tenant:
-            return "Tenant profile not found", 404
-
-        tenant_id = tenant[0]
-
-        # Fetch Complaints
-        cur.execute("""
-            SELECT id, title, description, priority, status, created_at
-            FROM complaints
-            WHERE tenant_id = %s
-            ORDER BY created_at DESC
-        """, (tenant_id,))
-
-        complaints = []
-        for row in cur.fetchall():
-            complaints.append({
-                'id': row[0],
-                'title': row[1],
-                'description': row[2],
-                'priority': row[3],
-                'status': row[4],
-                'created_at': row[5].strftime('%Y-%m-%d')
-            })
-
-        cur.close()
-        conn.close()
-
-        return render_template('tenant/complaints.html', complaints=complaints, session=session)
-
-    except Exception as e:
-        print(f"Error fetching tenant complaints: {e}")
-        return redirect(url_for('main.tenant_dashboard'))
-
-@bp.route('/tenant/complaint', methods=['POST'])
-def tenant_raise_complaint():
-    if session.get('role') != 'TENANT': return redirect(url_for('main.login'))
-
-    title = request.form['title']
-    description = request.form['description']
-    priority = request.form['priority']
-    user_id = session.get('user_id')
-
-    conn = get_db_connection()
-    cur = conn.cursor()
-    try:
-        cur.execute("SELECT id, owner_id FROM tenants WHERE user_id = %s", (user_id,))
-        res = cur.fetchone()
-        tenant_id = res[0]
-        owner_id = res[1]
-
-        cur.execute("""
-            INSERT INTO complaints (id, tenant_id, owner_id, title, description, priority, status)
-            VALUES (%s, %s, %s, %s, %s, %s, 'PENDING')
-        """, (str(uuid.uuid4()), tenant_id, owner_id, title, description, priority))
-
-        conn.commit()
-        flash("Complaint submitted successfully!", "success")
-    except Exception as e:
-        conn.rollback()
-        print(f"Error raising complaint: {e}")
-        flash("Failed to submit complaint", "error")
-    finally:
-        cur.close()
-        conn.close()
-
-    return redirect(url_for('main.tenant_complaints'))
-
-@bp.route('/tenant/qr/<tenant_id>')
-def tenant_qr_code(tenant_id):
-    import qrcode
-    from io import BytesIO
-    from flask import send_file
-
-    # Generate QR Code content (e.g., JSON with ID and Name for easy scanning)
-    # In a real app, this might be a signed token.
-    qr_content = f"TENANT:{tenant_id}"
-    
-    img = qrcode.make(qr_content)
-    buf = BytesIO()
-    img.save(buf)
-    buf.seek(0)
-    
-    return send_file(buf, mimetype='image/png')
-
-@bp.route('/tenant/profile')
-def tenant_profile():
-    if session.get('role') != 'TENANT': return redirect(url_for('main.login'))
-    
-    user_id = session.get('user_id')
-    
-    conn = get_db_connection()
-    cur = conn.cursor()
-    try:
-        cur.execute("""
-            SELECT t.full_name, t.email, t.phone_number, t.room_number, t.bed_number, t.lease_start
-            FROM tenants t
-            WHERE t.user_id = %s
-        """, (user_id,))
-        tenant = cur.fetchone()
-        
-        if not tenant:
-            return "Tenant not found", 404
-            
-        profile = {
-            'full_name': tenant[0],
-            'email': tenant[1],
-            'phone': tenant[2],
-            'room': tenant[3],
-            'bed': tenant[4],
-            'move_in': tenant[5]
-        }
-            
-        return render_template('tenant/profile.html', profile=profile, session=session)
-        
-    except Exception as e:
-        print(f"Error fetching profile: {e}")
-        return redirect(url_for('main.tenant_dashboard'))
-    finally:
-        cur.close()
-        conn.close()
-
-@bp.route('/tenant/profile/update', methods=['POST'])
-def tenant_update_profile():
-    if session.get('role') != 'TENANT': return redirect(url_for('main.login'))
-    
-    phone = request.form.get('phone')
-    password = request.form.get('password')
-    user_id = session.get('user_id')
-    
-    conn = get_db_connection()
-    cur = conn.cursor()
-    try:
-        # Update Phone
-        cur.execute("UPDATE tenants SET phone_number = %s WHERE user_id = %s", (phone, user_id))
-        
-        # Update Password if provided
-        if password:
-            hashed_pw = generate_password_hash(password)
-            cur.execute("UPDATE users SET password_hash = %s WHERE id = %s", (hashed_pw, user_id))
-            flash("Profile and password updated!", "success")
-        else:
-            flash("Profile updated successfully!", "success")
-            
-        conn.commit()
-    except Exception as e:
-        conn.rollback()
-        print(f"Error updating profile: {e}")
-        flash("Failed to update profile", "error")
-    finally:
-        cur.close()
-        conn.close()
-        
-    return redirect(url_for('main.tenant_profile'))
-
-@bp.route('/tenant/payments')
-def tenant_payments():
-    if session.get('role') != 'TENANT': return redirect(url_for('main.login'))
-    
-    user_id = session.get('user_id')
-    
-    conn = get_db_connection()
-    cur = conn.cursor()
-    try:
-        cur.execute("SELECT id FROM tenants WHERE user_id = %s", (user_id,))
-        tenant = cur.fetchone()
-        
-        if not tenant:
-            return "Tenant not found", 404
-            
-        tenant_id = tenant[0]
-        
-        cur.execute("""
-            SELECT amount, payment_date, payment_month, status, payment_mode, remarks, created_at
-            FROM payments 
-            WHERE tenant_id = %s 
-            ORDER BY payment_date DESC, created_at DESC
-        """, (tenant_id,))
-        
-        payments = []
-        for row in cur.fetchall():
-            payments.append({
-                'amount': row[0],
-                'date': row[1],
-                'month': row[2],
-                'status': row[3],
-                'mode': row[4],
-                'remarks': row[5],
-                'created_at': row[6]
-            })
-            
-        return render_template('tenant/payments.html', payments=payments, session=session)
-        
-    except Exception as e:
-        print(f"Error fetching payments: {e}")
-        return redirect(url_for('main.tenant_dashboard'))
-    finally:
-        cur.close()
-        conn.close()
