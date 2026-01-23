@@ -33,8 +33,19 @@
 
 ## ⚡ Quick Start
 
+### Windows (One-Command)
+We provide a helper script to set up everything (Python venv, dependencies, database) in one go:
+```powershell
+.\setup.ps1
+```
+Then, start the server:
+```bash
+npm run dev
+```
+
+### Manual Setup
 1.  **Clone** the repo.
-2.  **Setup** database and environment variables (Detailed in [SETUP.md](SETUP.md)).
+2.  **Setup** database and environment variables (Detailed in [SETUP.md](docs/SETUP.md)).
 3.  **Run**:
     ```bash
     npm run dev
