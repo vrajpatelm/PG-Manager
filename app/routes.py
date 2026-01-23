@@ -1602,9 +1602,9 @@ def tenant_pay_rent():
         owner_id = cur.fetchone()[0]
 
         cur.execute("""
-            INSERT INTO payments (id, tenant_id, owner_id, amount, payment_date, payment_month, payment_method, remarks, status)
-            VALUES (%s, %s, %s, %s, CURRENT_DATE, %s, 'UPI', %s, 'PENDING')
-        """, (str(uuid.uuid4()), tenant_id, owner_id, amount, payment_month, f"Txn Ref: {txn_id}"))
+            INSERT INTO payments (id, tenant_id, amount, payment_date, payment_month, payment_mode, remarks, status)
+            VALUES (%s, %s, %s, CURRENT_DATE, %s, 'UPI', %s, 'PENDING')
+        """, (str(uuid.uuid4()), tenant_id, amount, payment_month, f"Txn Ref: {txn_id}"))
 
         conn.commit()
         flash("Payment submitted for verification!", "success")
