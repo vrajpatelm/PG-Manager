@@ -1,6 +1,7 @@
 
 import os
 import json
+import uuid
 import psycopg2
 from flask import Blueprint, jsonify, redirect, render_template, request, url_for, session, flash
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -1558,11 +1559,12 @@ def tenant_dashboard():
             'owner_upi': owner_details[0] if owner_details else None,
             'owner_id': owner_details[1] if owner_details else None
         }
-        
+
         return render_template('tenant/dashboard.html', tenant=tenant_data)
     except Exception as e:
-        print(f"Error fetching tenant dashboard: {e}")
-        return "Error Loading Dashboard", 500
+        return render_template('tenant/dashboard.html',
+                         tenant=tenant_data,
+                         current_date=datetime.now())
     finally:
         cur.close()
         conn.close()
@@ -1570,51 +1572,133 @@ def tenant_dashboard():
 @bp.route('/tenant/pay', methods=['POST'])
 def tenant_pay_rent():
     if session.get('role') != 'TENANT': return redirect(url_for('main.login'))
-    
-    amount = request.form.get('amount')
-    txn_id = request.form.get('transaction_id')
-    tenant_id = request.form.get('tenant_id')
-    
+
+    amount = request.form['amount']
+    txn_id = request.form['transaction_id']
+    tenant_id = request.form['tenant_id']
+    payment_month = datetime.now().strftime('%Y-%m') # Current month payment
+
     conn = get_db_connection()
     cur = conn.cursor()
     try:
-        from datetime import datetime
-        current_month = datetime.now().strftime('%Y-%m')
-        
-        # Check if already paid
+        # Check if already paid/pending for this month to prevent duplicates
         cur.execute("""
-            SELECT id FROM payments 
-            WHERE tenant_id = %s AND payment_month = %s AND status = 'COMPLETED'
-        """, (tenant_id, current_month))
-        if cur.fetchone():
-             flash("Rent for this month is already paid!", "info")
-             return redirect(url_for('main.tenant_dashboard'))
+            SELECT id FROM payments
+            WHERE tenant_id = %s AND payment_month = %s AND status IN ('COMPLETED', 'PENDING')
+        """, (tenant_id, payment_month))
 
-        # Insert Payment Record
+        if cur.fetchone():
+            flash("Payment for this month is already recorded or pending.", "warning")
+            return redirect(url_for('main.tenant_dashboard'))
+
+        # Fetch Owner ID from Tenant
+        cur.execute("SELECT owner_id FROM tenants WHERE id = %s", (tenant_id,))
+        owner_id = cur.fetchone()[0]
+
         cur.execute("""
-            INSERT INTO payments (tenant_id, amount, payment_month, status, payment_mode, remarks)
-            VALUES (%s, %s, %s, 'PENDING', 'UPI', %s)
-        """, (tenant_id, amount, current_month, f"Txn Ref: {txn_id}"))
-        
+            INSERT INTO payments (id, tenant_id, owner_id, amount, payment_date, payment_month, payment_method, remarks, status)
+            VALUES (%s, %s, %s, %s, CURRENT_DATE, %s, 'UPI', %s, 'PENDING')
+        """, (str(uuid.uuid4()), tenant_id, owner_id, amount, payment_month, f"Txn Ref: {txn_id}"))
+
         conn.commit()
         flash("Payment submitted for verification!", "success")
-        
+
     except Exception as e:
         conn.rollback()
-        print(f"Payment Error: {e}")
+        print(f"Error submitting payment: {e}")
         flash("Failed to submit payment.", "error")
     finally:
         cur.close()
         conn.close()
-        
+
     return redirect(url_for('main.tenant_dashboard'))
+
+@bp.route('/tenant/complaints')
+def tenant_complaints():
+    if session.get('role') != 'TENANT': return redirect(url_for('main.login'))
+
+    user_id = session.get('user_id')
+
+    conn = get_db_connection()
+    cur = conn.cursor()
+    try:
+        # Get Tenant ID
+        cur.execute("SELECT id, full_name, email FROM tenants WHERE user_id = %s", (user_id,))
+        tenant = cur.fetchone()
+
+        if not tenant:
+            return "Tenant profile not found", 404
+
+        tenant_id = tenant[0]
+
+        # Fetch Complaints
+        cur.execute("""
+            SELECT id, title, description, priority, status, created_at
+            FROM complaints
+            WHERE tenant_id = %s
+            ORDER BY created_at DESC
+        """, (tenant_id,))
+
+        complaints = []
+        for row in cur.fetchall():
+            complaints.append({
+                'id': row[0],
+                'title': row[1],
+                'description': row[2],
+                'priority': row[3],
+                'status': row[4],
+                'created_at': row[5].strftime('%Y-%m-%d')
+            })
+
+        cur.close()
+        conn.close()
+
+        return render_template('tenant/complaints.html', complaints=complaints, session=session)
+
+    except Exception as e:
+        print(f"Error fetching tenant complaints: {e}")
+        return redirect(url_for('main.tenant_dashboard'))
+
+@bp.route('/tenant/complaint', methods=['POST'])
+def tenant_raise_complaint():
+    if session.get('role') != 'TENANT': return redirect(url_for('main.login'))
+
+    title = request.form['title']
+    description = request.form['description']
+    priority = request.form['priority']
+    user_id = session.get('user_id')
+
+    conn = get_db_connection()
+    cur = conn.cursor()
+    try:
+        cur.execute("SELECT id, owner_id FROM tenants WHERE user_id = %s", (user_id,))
+        res = cur.fetchone()
+        tenant_id = res[0]
+        owner_id = res[1]
+
+        cur.execute("""
+            INSERT INTO complaints (id, tenant_id, owner_id, title, description, priority, status)
+            VALUES (%s, %s, %s, %s, %s, %s, 'PENDING')
+        """, (str(uuid.uuid4()), tenant_id, owner_id, title, description, priority))
+
+        conn.commit()
+        flash("Complaint submitted successfully!", "success")
+    except Exception as e:
+        conn.rollback()
+        print(f"Error raising complaint: {e}")
+        flash("Failed to submit complaint", "error")
+    finally:
+        cur.close()
+        conn.close()
+
+    return redirect(url_for('main.tenant_complaints'))
 
 @bp.route('/tenant/qr/<tenant_id>')
 def tenant_qr_code(tenant_id):
     import qrcode
     from io import BytesIO
     from flask import send_file
-    
+
     # Generate QR Code content (e.g., JSON with ID and Name for easy scanning)
     # In a real app, this might be a signed token.
     qr_content = f"TENANT:{tenant_id}"
