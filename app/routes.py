@@ -1709,3 +1709,48 @@ def tenant_qr_code(tenant_id):
     buf.seek(0)
     
     return send_file(buf, mimetype='image/png')
+
+@bp.route('/tenant/payments')
+def tenant_payments():
+    if session.get('role') != 'TENANT': return redirect(url_for('main.login'))
+    
+    user_id = session.get('user_id')
+    
+    conn = get_db_connection()
+    cur = conn.cursor()
+    try:
+        cur.execute("SELECT id FROM tenants WHERE user_id = %s", (user_id,))
+        tenant = cur.fetchone()
+        
+        if not tenant:
+            return "Tenant not found", 404
+            
+        tenant_id = tenant[0]
+        
+        cur.execute("""
+            SELECT amount, payment_date, payment_month, status, payment_mode, remarks, created_at
+            FROM payments 
+            WHERE tenant_id = %s 
+            ORDER BY payment_date DESC, created_at DESC
+        """, (tenant_id,))
+        
+        payments = []
+        for row in cur.fetchall():
+            payments.append({
+                'amount': row[0],
+                'date': row[1],
+                'month': row[2],
+                'status': row[3],
+                'mode': row[4],
+                'remarks': row[5],
+                'created_at': row[6]
+            })
+            
+        return render_template('tenant/payments.html', payments=payments, session=session)
+        
+    except Exception as e:
+        print(f"Error fetching payments: {e}")
+        return redirect(url_for('main.tenant_dashboard'))
+    finally:
+        cur.close()
+        conn.close()
