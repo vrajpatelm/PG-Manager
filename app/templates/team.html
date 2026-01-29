@@ -31,53 +31,94 @@
         </div>
     </header>
 
+    <!-- Matrix Rain Canvas -->
+    <canvas id="matrix-canvas" class="fixed top-0 left-0 w-full h-full pointer-events-none opacity-20"></canvas>
+
     <!-- Main Content -->
-    <div class="bg-slate-900 min-h-screen text-white overflow-hidden relative selection:bg-brand1 selection:text-white">
+    <div class="bg-slate-900 min-h-screen text-white overflow-hidden relative selection:bg-brand1 selection:text-white bg-opacity-90">
         
         <!-- Background Effects -->
         <div class="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
-            <div class="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-purple-600/20 rounded-full blur-[120px] animate-pulse"></div>
-            <div class="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-blue-600/20 rounded-full blur-[120px] animate-pulse delay-1000"></div>
-            <div class="absolute top-[40%] left-[50%] -translate-x-1/2 w-[30%] h-[30%] bg-brand1/10 rounded-full blur-[100px]"></div>
+            <div class="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-purple-600/10 rounded-full blur-[120px] animate-pulse"></div>
+            <div class="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-blue-600/10 rounded-full blur-[120px] animate-pulse delay-1000"></div>
         </div>
 
-        <!-- Hero -->
-        <div class="relative pt-40 pb-20 text-center px-4" data-aos="zoom-out">
-            <h1 class="text-5xl md:text-7xl font-black tracking-tight mb-6">
-                The <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-brand1 to-purple-500">Visionaries</span>
+        <!-- Hero: Terminal & Laptop -->
+        <div class="relative pt-32 pb-16 text-center px-4" data-aos="zoom-out">
+            
+            <!-- Terminal Typing Effect -->
+            <div class="max-w-3xl mx-auto mb-12">
+                <div class="bg-slate-800 rounded-t-xl p-3 flex items-center gap-2 border border-slate-700">
+                    <div class="w-3 h-3 rounded-full bg-red-500"></div>
+                    <div class="w-3 h-3 rounded-full bg-yellow-500"></div>
+                    <div class="w-3 h-3 rounded-full bg-green-500"></div>
+                    <div class="ml-4 text-xs text-slate-400 font-mono">user@pg-manager:~/team</div>
+                </div>
+                <div class="bg-slate-950/90 backdrop-blur border-x border-b border-slate-700 p-6 rounded-b-xl shadow-2xl text-left h-48 md:h-40 overflow-hidden relative">
+                    <div class="font-mono text-green-400 text-sm md:text-base">
+                        <span class="opacity-50">$</span> <span id="typewriter"></span><span class="animate-pulse">_</span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Animated Laptop Illustration -->
+             <div class="relative w-64 h-40 mx-auto mb-16 transform hover:scale-105 transition-transform duration-500 group">
+                <!-- Screen Glow -->
+                <div class="absolute inset-0 bg-blue-500/20 blur-xl rounded-full"></div>
+                <!-- Laptop SVG -->
+                <svg viewBox="0 0 512 350" class="w-full h-full drop-shadow-2xl">
+                    <!-- Base -->
+                    <path d="M469.3,37.3H42.7C19.1,37.3,0,56.4,0,80v170.7c0,23.6,19.1,42.7,42.7,42.7h426.7c23.6,0,42.7-19.1,42.7-42.7V80 C512,56.4,492.9,37.3,469.3,37.3z" fill="#1e293b"/>
+                    <!-- Screen -->
+                    <path d="M458.7,48H53.3c-5.9,0-10.7,4.8-10.7,10.7v192c0,5.9,4.8,10.7,10.7,10.7h405.3c5.9,0,10.7-4.8,10.7-10.7v-192 C469.3,52.8,464.6,48,458.7,48z" fill="#0f172a"/>
+                    <!-- Keyboard Area -->
+                    <path d="M512,293.3H0v21.3c0,17.7,14.3,32,32,32h448c17.7,0,32-14.3,32-32V293.3z" fill="#334155"/>
+                    <path d="M213.3,320h85.3c2.9,0,5.3-2.4,5.3-5.3v0c0-2.9-2.4-5.3-5.3-5.3h-85.3c-2.9,0-5.3,2.4-5.3,5.3v0 C208,317.6,210.4,320,213.3,320z" fill="#475569"/>
+                    <!-- Code Animation Lines -->
+                    <g class="animate-pulse">
+                        <rect x="64" y="69" width="128" height="8" rx="4" fill="#3b82f6" opacity="0.8"/>
+                        <rect x="64" y="85" width="85" height="8" rx="4" fill="#a855f7" opacity="0.6"/>
+                        <rect x="64" y="101" width="170" height="8" rx="4" fill="#22c55e" opacity="0.5"/>
+                         <!-- Floating Code Blocks -->
+                        <rect x="250" y="80" width="100" height="60" rx="4" fill="#1e293b" stroke="#334155"/>
+                        <rect x="260" y="90" width="60" height="4" rx="2" fill="#ef4444"/>
+                        <rect x="260" y="100" width="40" height="4" rx="2" fill="#eab308"/>
+                    </g>
+                </svg>
+            </div>
+
+            <h1 class="text-4xl md:text-5xl font-black tracking-tight mb-6">
+                The Architects of <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-brand1 to-purple-500">Innovation</span>
             </h1>
-            <p class="text-xl text-slate-400 max-w-2xl mx-auto leading-relaxed">
-                Meet the minds crafting the future of property management. <br class="hidden md:block">Three developers, one mission.
-            </p>
         </div>
 
         <!-- Team Grid -->
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-32 relative z-10">
             <div class="grid grid-cols-1 md:grid-cols-3 gap-8 lg:gap-12">
-                
+                <!-- Cards remain same but container has backdrop -->
                 <!-- Dhruv -->
                 <div class="group relative" data-aos="fade-up" data-aos-delay="0">
                     <div class="absolute inset-0 bg-gradient-to-b from-blue-500/20 to-purple-500/20 rounded-3xl blur-xl opacity-0 group-hover:opacity-100 transition-all duration-500 transform group-hover:scale-110"></div>
-                    <div class="relative bg-white/5 backdrop-blur-xl border border-white/10 rounded-3xl p-8 hover:border-white/20 transition-all duration-300 h-full flex flex-col group-hover:-translate-y-2">
+                    <div class="relative bg-slate-800/50 backdrop-blur-xl border border-white/10 rounded-3xl p-8 hover:border-blue-400/50 transition-all duration-300 h-full flex flex-col group-hover:-translate-y-2 group-hover:shadow-2xl group-hover:shadow-blue-500/10">
                         <div class="mb-8 relative">
-                            <div class="w-24 h-24 rounded-2xl bg-gradient-to-br from-blue-500 to-blue-700 flex items-center justify-center text-4xl font-bold text-white shadow-lg shadow-blue-500/30 mx-auto">
+                            <div class="w-24 h-24 rounded-2xl bg-gradient-to-br from-blue-500 to-blue-700 flex items-center justify-center text-4xl font-bold text-white shadow-lg shadow-blue-500/30 mx-auto relative overflow-hidden">
                                 D
+                                <!-- Glitch Overlay -->
+                                <div class="absolute inset-0 bg-white/20 -translate-x-full group-hover:animate-shine"></div>
                             </div>
-                            <div class="absolute -bottom-3 left-1/2 -translate-x-1/2 bg-slate-800 text-blue-400 text-xs font-bold px-3 py-1 rounded-full border border-blue-500/30">
+                            <div class="absolute -bottom-3 left-1/2 -translate-x-1/2 bg-slate-900 text-blue-400 text-xs font-bold px-3 py-1 rounded-full border border-blue-500/30 shadow-lg">
                                 LEAD
                             </div>
                         </div>
                         <div class="text-center">
                             <h3 class="text-2xl font-bold mb-1 group-hover:text-blue-400 transition-colors">Dhruv Harani</h3>
-                            <p class="text-slate-400 text-sm font-medium mb-6 uppercase tracking-wider">Core Developer</p>
+                            <p class="text-slate-400 text-sm font-medium mb-6 uppercase tracking-wider font-mono text-xs">./core-developer</p>
                             <p class="text-slate-300 leading-relaxed mb-8">
-                                The architect behind the system. Specialized in scalable infrastructure and turning complex problems into elegant code.
+                                Architecting scalable infrastructure. Turning complex problems into elegant, optimized code solutions.
                             </p>
                         </div>
                         <div class="mt-auto flex justify-center space-x-5 opacity-60 group-hover:opacity-100 transition-opacity">
-                            <!-- Social Icons (Placeholder) -->
-                            <a href="#" class="hover:text-blue-400 transition-colors"><svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg></a>
-                            <a href="#" class="hover:text-blue-400 transition-colors"><svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg></a>
+                             <a href="#" class="hover:text-blue-400 transition-colors transform hover:scale-110"><svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg></a>
                         </div>
                     </div>
                 </div>
@@ -85,24 +126,25 @@
                 <!-- Vraj -->
                 <div class="group relative" data-aos="fade-up" data-aos-delay="100">
                     <div class="absolute inset-0 bg-gradient-to-b from-purple-500/20 to-pink-500/20 rounded-3xl blur-xl opacity-0 group-hover:opacity-100 transition-all duration-500 transform group-hover:scale-110"></div>
-                     <div class="relative bg-white/5 backdrop-blur-xl border border-white/10 rounded-3xl p-8 hover:border-white/20 transition-all duration-300 h-full flex flex-col group-hover:-translate-y-2">
+                     <div class="relative bg-slate-800/50 backdrop-blur-xl border border-white/10 rounded-3xl p-8 hover:border-purple-400/50 transition-all duration-300 h-full flex flex-col group-hover:-translate-y-2 group-hover:shadow-2xl group-hover:shadow-purple-500/10">
                         <div class="mb-8 relative">
-                            <div class="w-24 h-24 rounded-2xl bg-gradient-to-br from-purple-500 to-purple-700 flex items-center justify-center text-4xl font-bold text-white shadow-lg shadow-purple-500/30 mx-auto">
+                            <div class="w-24 h-24 rounded-2xl bg-gradient-to-br from-purple-500 to-purple-700 flex items-center justify-center text-4xl font-bold text-white shadow-lg shadow-purple-500/30 mx-auto relative overflow-hidden">
                                 V
+                                <div class="absolute inset-0 bg-white/20 -translate-x-full group-hover:animate-shine"></div>
                             </div>
-                            <div class="absolute -bottom-3 left-1/2 -translate-x-1/2 bg-slate-800 text-purple-400 text-xs font-bold px-3 py-1 rounded-full border border-purple-500/30">
+                            <div class="absolute -bottom-3 left-1/2 -translate-x-1/2 bg-slate-900 text-purple-400 text-xs font-bold px-3 py-1 rounded-full border border-purple-500/30 shadow-lg">
                                 BACKEND
                             </div>
                         </div>
                         <div class="text-center">
                             <h3 class="text-2xl font-bold mb-1 group-hover:text-purple-400 transition-colors">Vraj</h3>
-                             <p class="text-slate-400 text-sm font-medium mb-6 uppercase tracking-wider">Backend Developer</p>
+                             <p class="text-slate-400 text-sm font-medium mb-6 uppercase tracking-wider font-mono text-xs">./backend-ninja</p>
                              <p class="text-slate-300 leading-relaxed mb-8">
                                 The engine room. Expert in database optimization, API security, and high-performance server logic.
                             </p>
                         </div>
                          <div class="mt-auto flex justify-center space-x-5 opacity-60 group-hover:opacity-100 transition-opacity">
-                             <a href="#" class="hover:text-purple-400 transition-colors"><svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg></a>
+                             <a href="#" class="hover:text-purple-400 transition-colors transform hover:scale-110"><svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg></a>
                         </div>
                     </div>
                 </div>
@@ -110,24 +152,25 @@
                 <!-- Ayush -->
                 <div class="group relative" data-aos="fade-up" data-aos-delay="200">
                     <div class="absolute inset-0 bg-gradient-to-b from-brand1/20 to-teal-400/20 rounded-3xl blur-xl opacity-0 group-hover:opacity-100 transition-all duration-500 transform group-hover:scale-110"></div>
-                     <div class="relative bg-white/5 backdrop-blur-xl border border-white/10 rounded-3xl p-8 hover:border-white/20 transition-all duration-300 h-full flex flex-col group-hover:-translate-y-2">
+                     <div class="relative bg-slate-800/50 backdrop-blur-xl border border-white/10 rounded-3xl p-8 hover:border-brand1/50 transition-all duration-300 h-full flex flex-col group-hover:-translate-y-2 group-hover:shadow-2xl group-hover:shadow-brand1/10">
                         <div class="mb-8 relative">
-                            <div class="w-24 h-24 rounded-2xl bg-gradient-to-br from-brand1 to-teal-400 flex items-center justify-center text-4xl font-bold text-white shadow-lg shadow-brand1/30 mx-auto">
+                            <div class="w-24 h-24 rounded-2xl bg-gradient-to-br from-brand1 to-teal-400 flex items-center justify-center text-4xl font-bold text-white shadow-lg shadow-brand1/30 mx-auto relative overflow-hidden">
                                 A
+                                <div class="absolute inset-0 bg-white/20 -translate-x-full group-hover:animate-shine"></div>
                             </div>
-                            <div class="absolute -bottom-3 left-1/2 -translate-x-1/2 bg-slate-800 text-brand1 text-xs font-bold px-3 py-1 rounded-full border border-brand1/30">
+                            <div class="absolute -bottom-3 left-1/2 -translate-x-1/2 bg-slate-900 text-brand1 text-xs font-bold px-3 py-1 rounded-full border border-brand1/30 shadow-lg">
                                 FRONTEND
                             </div>
                         </div>
                         <div class="text-center">
                             <h3 class="text-2xl font-bold mb-1 group-hover:text-brand1 transition-colors">Ayush</h3>
-                            <p class="text-slate-400 text-sm font-medium mb-6 uppercase tracking-wider">Frontend Developer</p>
+                            <p class="text-slate-400 text-sm font-medium mb-6 uppercase tracking-wider font-mono text-xs">./ui-ux-wizard</p>
                              <p class="text-slate-300 leading-relaxed mb-8">
                                 Pixel perfectionist. Crafting intuitive, beautiful interfaces that users love to interact with.
                             </p>
                         </div>
                         <div class="mt-auto flex justify-center space-x-5 opacity-60 group-hover:opacity-100 transition-opacity">
-                             <a href="#" class="hover:text-brand1 transition-colors"><svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg></a>
+                             <a href="#" class="hover:text-brand1 transition-colors transform hover:scale-110"><svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg></a>
                         </div>
                     </div>
                 </div>
@@ -137,18 +180,117 @@
 
     </div>
 
-    <!-- Simple Footer (Dark) -->
-    <footer class="bg-slate-900 border-t border-white/10 py-12 text-white">
-        <div class="max-w-7xl mx-auto px-4 text-center">
-            <p class="text-slate-500">© 2026 PG-Manager. All rights reserved.</p>
+    <!-- Footer -->
+    <footer class="bg-footer text-white pt-16 pb-8 border-t border-white/5 bg-slate-900">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 mb-12">
+            <!-- Left Side: Links Grid -->
+            <div class="grid grid-cols-2 sm:grid-cols-3 gap-8 mb-8 lg:mb-0">
+               <div>
+                 <h4 class="font-bold mb-4 text-white">Company</h4>
+                 <ul class="space-y-2 text-sm text-gray-400">
+                   <li><a href="{{ url_for('main.about') }}" class="hover:text-brand1 transition-colors">About Us</a></li>
+                   <li><a href="{{ url_for('main.careers') }}" class="hover:text-brand1 transition-colors">Careers</a></li>
+                   <li><a href="{{ url_for('main.team') }}" class="hover:text-brand1 transition-colors">Team</a></li>
+                 </ul>
+               </div>
+               <div>
+                 <h4 class="font-bold mb-4 text-white">Pages</h4>
+                 <ul class="space-y-2 text-sm text-gray-400">
+                    <li><a href="{{ url_for('main.login') }}" class="hover:text-brand1 transition-colors">Login</a></li>
+                    <li><a href="{{ url_for('main.signup') }}" class="hover:text-brand1 transition-colors">Register</a></li>
+                 </ul>
+               </div>
+                <div>
+                 <h4 class="font-bold mb-4 text-white">Legal</h4>
+                 <ul class="space-y-2 text-sm text-gray-400">
+                   <li><a href="{{ url_for('main.terms') }}" class="hover:text-brand1 transition-colors">Terms</a></li>
+                   <li><a href="{{ url_for('main.privacy') }}" class="hover:text-brand1 transition-colors">Privacy</a></li>
+                   <li><a href="{{ url_for('main.contact') }}" class="hover:text-brand1 transition-colors">Contact</a></li>
+                 </ul>
+               </div>
+            </div>
+             <!-- Right Side: Subscribe -->
+            <div class="lg:ml-auto max-w-sm w-full">
+                <h4 class="font-bold mb-4 text-white">Subscribe</h4>
+                <div class="flex flex-col gap-4">
+                  <form action="{{ url_for('main.subscribe') }}" method="POST" class="relative">
+                    <label for="email-subscribe" class="sr-only">Your Email</label>
+                    <div class="flex gap-2">
+                      <input type="email" name="email" id="email-subscribe" required placeholder="someone@example.com" class="w-full bg-gray-800/50 border border-gray-700 text-white text-sm rounded-lg focus:ring-brand1 focus:border-brand1 block p-2.5 placeholder-gray-500 outline-none transition-all focus:bg-gray-800" />
+                      <button type="submit" class="btn-primary px-5 py-2.5 rounded-lg font-medium text-sm hover:opacity-95 whitespace-nowrap shadow-lg hover:shadow-brand1/20 transition-all duration-300">Subscribe</button>
+                    </div>
+                  </form>
+                </div>
+            </div>
         </div>
+        <div class="border-t border-gray-800 pt-8 text-center text-gray-500 text-sm">
+          &copy; 2026 PG-Manager. All Rights Reserved.
+        </div>
+      </div>
     </footer>
 
     <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
     <script>
-      AOS.init({
-        duration: 800,
-        once: true,
+      AOS.init({ duration: 800, once: true });
+
+      // Matrix Effect
+      const canvas = document.getElementById('matrix-canvas');
+      const ctx = canvas.getContext('2d');
+      canvas.height = window.innerHeight;
+      canvas.width = window.innerWidth;
+
+      const letters = '0101010101ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+      const fontSize = 14;
+      const columns = canvas.width / fontSize;
+      const drops = Array(Math.floor(columns)).fill(1);
+
+      function drawMatrix() {
+          ctx.fillStyle = 'rgba(15, 23, 42, 0.05)'; // Fade effect
+          ctx.fillRect(0, 0, canvas.width, canvas.height);
+          ctx.fillStyle = '#0F0'; // Green text
+          ctx.font = fontSize + 'px monospace';
+
+          for (let i = 0; i < drops.length; i++) {
+              const text = letters.charAt(Math.floor(Math.random() * letters.length));
+              ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+              if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
+                  drops[i] = 0;
+              }
+              drops[i]++;
+          }
+      }
+      setInterval(drawMatrix, 50);
+      
+      // Typewriter Effect
+      const typewriterText = ["Initializing Team Protocols...", "Loading Developer Profiles...", "Connecting to Neuro-Network...", "Access Granted."];
+      let lineIndex = 0;
+      let charIndex = 0;
+      const typeSpan = document.getElementById('typewriter');
+      
+      function type() {
+          if (lineIndex < typewriterText.length) {
+              if (charIndex < typewriterText[lineIndex].length) {
+                  typeSpan.textContent += typewriterText[lineIndex].charAt(charIndex);
+                  charIndex++;
+                  setTimeout(type, 50);
+              } else {
+                  setTimeout(() => {
+                      if(lineIndex < typewriterText.length - 1) {
+                         typeSpan.textContent = ""; 
+                         charIndex = 0;
+                         lineIndex++;
+                         type();
+                      }
+                  }, 1500);
+              }
+          }
+      }
+      setTimeout(type, 1000);
+
+      window.addEventListener('resize', () => {
+          canvas.height = window.innerHeight;
+          canvas.width = window.innerWidth;
       });
     </script>
 </body>
