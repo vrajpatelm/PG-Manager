@@ -250,6 +250,132 @@ def privacy():
 def team():
     return render_template('team.html')
 
+@bp.route('/subscribe', methods=['POST'])
+def subscribe():
+    email = request.form.get('email')
+    
+    if not email:
+        flash('Please provide an email address.', 'error')
+        return redirect(request.referrer or url_for('main.index'))
+    
+    conn = get_db_connection()
+    cur = conn.cursor()
+    
+    try:
+        # Check if already subscribed
+        cur.execute('SELECT id FROM subscribers WHERE email = %s', (email,))
+        if cur.fetchone():
+            flash('You are already subscribed!', 'info')
+        else:
+            cur.execute('INSERT INTO subscribers (email) VALUES (%s)', (email,))
+            conn.commit()
+            
+            # Send Welcome Email
+            try:
+                import smtplib
+                from email.mime.text import MIMEText
+                from email.mime.multipart import MIMEMultipart
+                
+                smtp_server = os.environ.get('MAIL_SERVER')
+                smtp_port = os.environ.get('MAIL_PORT')
+                smtp_user = os.environ.get('MAIL_USERNAME')
+                smtp_password = os.environ.get('MAIL_PASSWORD')
+                
+                if smtp_server and smtp_user and smtp_password:
+                    msg = MIMEMultipart()
+                    msg['From'] = f"PG-Manager <{smtp_user}>"
+                    msg['To'] = email
+                    msg['Subject'] = "🌟 You're In! Welcome to the Future of Living"
+                    
+                    html_content = f"""
+                    <!DOCTYPE html>
+                    <html>
+                    <head>
+                        <style>
+                            body {{ font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; padding: 0; background-color: #f3f4f6; }}
+                            .container {{ max-width: 600px; margin: 40px auto; background: #ffffff; border-radius: 20px; overflow: hidden; box-shadow: 0 10px 25px rgba(0,0,0,0.05); }}
+                            .header {{ background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); padding: 40px 20px; text-align: center; position: relative; }}
+                            .header::after {{ content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 4px; background: linear-gradient(90deg, #D61C4E, #FEB139); }}
+                            .logo {{ font-size: 28px; font-weight: 800; color: #ffffff; text-decoration: none; letter-spacing: -1px; }}
+                            .logo span {{ color: #D61C4E; }}
+                            .content {{ padding: 40px 30px; color: #334155; line-height: 1.7; }}
+                            .h1 {{ font-size: 26px; font-weight: 700; color: #1e293b; margin-bottom: 15px; }}
+                            .intro {{ font-size: 16px; margin-bottom: 30px; color: #475569; }}
+                            .card {{ background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 25px; margin-bottom: 25px; transition: transform 0.2s; }}
+                            .card-title {{ font-weight: 600; color: #D61C4E; margin-bottom: 8px; font-size: 18px; display: flex; align-items: center; gap: 10px; }}
+                            .footer {{ background: #f8fafc; padding: 30px; text-align: center; border-top: 1px solid #e2e8f0; font-size: 13px; color: #94a3b8; }}
+                            .btn {{ display: inline-block; background: #D61C4E; color: #ffffff; padding: 12px 30px; border-radius: 50px; text-decoration: none; font-weight: 600; margin-top: 20px; box-shadow: 0 4px 6px rgba(214, 28, 78, 0.2); }}
+                            .btn:hover {{ background: #be123c; }}
+                        </style>
+                    </head>
+                    <body>
+                        <div class="container">
+                            <div class="header">
+                                <div class="logo">PG-<span>Manager</span></div>
+                            </div>
+                            <div class="content">
+                                <div class="h1">Welcome into the Inner Circle! 🚀</div>
+                                <p class="intro">Hi there,</p>
+                                <p class="intro">
+                                    Thank you for subscribing to PG-Manager. You’ve just taken a step towards smarter living and effortless management. We are thrilled to have you with us!
+                                </p>
+                                
+                                <div class="card">
+                                    <div class="card-title">✨ Exclusive Updates</div>
+                                    <p style="margin:0; font-size:15px;">Be the first to know about our latest features, smart tools for owners, and seamless experiences for tenants.</p>
+                                </div>
+                                
+                                <div class="card">
+                                    <div class="card-title">💡 Expert Insights</div>
+                                    <p style="margin:0; font-size:15px;">Get curated tips on property management, co-living trends, and how to maximize your rental yield.</p>
+                                </div>
+
+                                <div class="card">
+                                    <div class="card-title">🎁 Subscriber Perks</div>
+                                    <p style="margin:0; font-size:15px;">Enjoy early access to premium tools and special offers reserved strictly for our community members.</p>
+                                </div>
+                                
+                                <p style="margin-top: 30px;">
+                                    We promise to keep our emails valuable, interesting, and fluff-free. Get ready for some amazing things landing in your inbox soon!
+                                </p>
+                                
+                                <div style="text-align: center; margin-top: 40px;">
+                                    <a href="{url_for('main.index', _external=True)}" class="btn">Explore Dashboard</a>
+                                </div>
+                            </div>
+                            <div class="footer">
+                                <p>&copy; 2026 PG-Manager. All rights reserved.</p>
+                                <p>You received this email because you subscribed on our website. <br>
+                                <a href="#" style="color: #64748b; text-decoration: underline;">Unsubscribe</a></p>
+                            </div>
+                        </div>
+                    </body>
+                    </html>
+                    """
+                    
+                    msg.attach(MIMEText(html_content, 'html'))
+                    
+                    server = smtplib.SMTP(smtp_server, int(smtp_port) if smtp_port else 587)
+                    server.starttls()
+                    server.login(smtp_user, smtp_password)
+                    server.send_message(msg)
+                    server.quit()
+            except Exception as e:
+                current_app.logger.error(f"Failed to send subscription email: {e}")
+                # Don't fail the request, just log it. The user is subscribed.
+
+            flash('Successfully subscribed to our newsletter!', 'success')
+            
+    except Exception as e:
+        conn.rollback()
+        current_app.logger.error(f"Subscription error: {e}")
+        flash('An error occurred. Please try again.', 'error')
+    finally:
+        cur.close()
+        conn.close()
+        
+    return redirect(request.referrer or url_for('main.index'))
+
 def time_ago(date):
     if not date: return ''
     from datetime import datetime, timezone, date as d

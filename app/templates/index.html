@@ -115,6 +115,25 @@
       class="relative pt-32 pb-20 lg:pt-48 lg:pb-32 overflow-hidden"
     >
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+        <!-- Flash Messages -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+          {% if messages %}
+            <div class="mb-8 max-w-lg mx-auto space-y-2">
+              {% for category, message in messages %}
+                <div class="p-4 rounded-xl text-sm font-medium flex items-center justify-center gap-2 shadow-lg animate-fade-in
+                    {% if category == 'error' %} bg-red-50 text-red-600 border border-red-100
+                    {% else %} bg-green-50 text-green-600 border border-green-100 {% endif %}">
+                  {% if category == 'error' %}
+                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                  {% else %}
+                     <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
+                  {% endif %}
+                  {{ message }}
+                </div>
+              {% endfor %}
+            </div>
+          {% endif %}
+        {% endwith %}
         <h1
           class="text-5xl md:text-6xl lg:text-7xl font-extrabold tracking-tight mb-6"
         >
@@ -701,15 +720,10 @@
                   <a href="{{ url_for('main.careers') }}" class="hover:text-brand1 transition-colors"
                     >Careers</a
                   >
-                </li>
+
                 <li>
-                  <a href="#" class="hover:text-brand1 transition-colors"
-                    >Premium Tools</a
-                  >
-                </li>
-                <li>
-                  <a href="#" class="hover:text-brand1 transition-colors"
-                    >Blogs</a
+                  <a href="{{ url_for('main.team') }}" class="hover:text-brand1 transition-colors"
+                    >Team</a
                   >
                 </li>
               </ul>
@@ -754,11 +768,6 @@
                   >
                 </li>
                 <li>
-                  <a href="{{ url_for('main.team') }}" class="hover:text-brand1 transition-colors"
-                    >Team</a
-                  >
-                </li>
-                <li>
                   <a href="{{ url_for('main.contact') }}" class="hover:text-brand1 transition-colors"
                     >Contact</a
                   >
@@ -775,38 +784,39 @@
               informed about fresh sales.
             </p>
             <div class="flex flex-col gap-4">
-              <div class="relative">
+              <form action="{{ url_for('main.subscribe') }}" method="POST" class="relative">
                 <label for="email-subscribe" class="sr-only">Your Email</label>
                 <div class="flex gap-2">
                   <input
                     type="email"
+                    name="email"
                     id="email-subscribe"
+                    required
                     placeholder="someone@example.com"
                     class="w-full bg-gray-800/50 border border-gray-700 text-white text-sm rounded-lg focus:ring-brand1 focus:border-brand1 block p-2.5 placeholder-gray-500 outline-none transition-all focus:bg-gray-800"
                   />
                   <button
+                    type="submit"
                     class="btn-primary px-5 py-2.5 rounded-lg font-medium text-sm hover:opacity-95 whitespace-nowrap shadow-lg hover:shadow-brand1/20 transition-all duration-300"
                   >
                     Subscribe
                   </button>
                 </div>
-              </div>
-              <div class="flex items-start gap-2">
-                <div class="flex items-center h-5">
+                <div class="flex items-center mt-3">
                   <input
-                    id="terms"
+                    id="terms-newsletter"
                     type="checkbox"
-                    value=""
+                    required
                     class="w-4 h-4 border border-gray-600 rounded bg-gray-700 focus:ring-3 focus:ring-brand1 ring-offset-gray-800 cursor-pointer accent-[#D61C4E]"
                   />
+                  <label for="terms-newsletter" class="ml-2 text-xs text-gray-400 font-medium select-none cursor-pointer">
+                    I agree with the
+                    <a href="{{ url_for('main.terms') }}" class="text-brand1 hover:underline"
+                      >terms and conditions</a
+                    >
+                  </label>
                 </div>
-                <label for="terms" class="text-xs text-gray-400 font-medium select-none cursor-pointer">
-                  I agree with the
-                  <a href="#" class="text-brand1 hover:underline"
-                    >terms and conditions</a
-                  >
-                </label>
-              </div>
+              </form>
             </div>
           </div>
         </div>
