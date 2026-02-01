@@ -7,6 +7,7 @@ from flask import render_template, request, redirect, url_for, session, flash, R
 from app.database.database import get_db_connection
 from app.utils.decorators import role_required
 from app.utils.mailer import send_email
+from app.utils.activity import log_activity
 from . import bp
 
 @bp.route('/owner/dashboard')
@@ -204,57 +205,19 @@ def owner_dashboard():
             })
 
         cur.execute("""
-            SELECT type, title, description, created_at, metadata FROM (
-                SELECT 'PAYMENT' as type, 
-                       'Rent Received' as title, 
-                       'From ' || t.full_name || ' (₹' || p.amount || ')' as description, 
-                       p.created_at,
-                       'green' as metadata
-                FROM payments p 
-                JOIN tenants t ON p.tenant_id = t.id 
-                WHERE t.owner_id = %s
-                
-                UNION ALL
-                
-                SELECT 'MOVEMENT' as type, 
-                       'New Tenant' as title, 
-                       full_name || ' joined Room ' || room_number as description, 
-                       created_at,
-                       'blue' as metadata
-                FROM tenants 
-                WHERE owner_id = %s
-                
-                UNION ALL
-                
-                SELECT 'COMPLAINT' as type, 
-                       'New Complaint' as title, 
-                       title || ' in Room ' || (SELECT room_number FROM tenants WHERE id = complaints.tenant_id) as description, 
-                       created_at,
-                       'red' as metadata
-                FROM complaints 
-                WHERE owner_id = %s
-                
-                UNION ALL
-                
-                SELECT 'NOTICE' as type,
-                       'Notice Posted' as title,
-                       title as description,
-                       created_at,
-                       'purple' as metadata
-                FROM notices
-                WHERE owner_id = %s
-            ) as activity
-            ORDER BY created_at DESC
-            LIMIT 5
-        """, (owner_id, owner_id, owner_id, owner_id))
+            SELECT event_type, description, created_at, metadata 
+            FROM activity_logs 
+            WHERE owner_id = %s 
+            ORDER BY created_at DESC 
+            LIMIT 10
+        """, (owner_id,))
         recent_activity = []
         for row in cur.fetchall():
             recent_activity.append({
                 'type': row[0],
-                'title': row[1],
-                'description': row[2],
-                'created_at': row[3],
-                'metadata': row[4]
+                'description': row[1],
+                'created_at': row[2],
+                'metadata': row[3] if row[3] else {}
             })
         
         return render_template('owner/dashboard.html', 
@@ -316,6 +279,13 @@ def approve_payment(payment_id):
     cur = conn.cursor()
     try:
         cur.execute("UPDATE payments SET status = 'COMPLETED' WHERE id = %s", (payment_id,))
+        
+        # Log Activity
+        cur.execute("SELECT p.amount, t.full_name, t.owner_id FROM payments p JOIN tenants t ON p.tenant_id = t.id WHERE p.id = %s", (payment_id,))
+        pay_row = cur.fetchone()
+        if pay_row:
+             log_activity(pay_row[2], 'PAYMENT', f"Verified payment of ₹{pay_row[0]} from {pay_row[1]}", {'payment_id': payment_id})
+
         conn.commit()
         flash("Payment verified successfully!", "success")
     except Exception as e:
@@ -334,6 +304,13 @@ def reject_payment(payment_id):
     cur = conn.cursor()
     try:
         cur.execute("UPDATE payments SET status = 'FAILED' WHERE id = %s", (payment_id,))
+        
+        # Log Activity
+        cur.execute("SELECT p.amount, t.full_name, t.owner_id FROM payments p JOIN tenants t ON p.tenant_id = t.id WHERE p.id = %s", (payment_id,))
+        pay_row = cur.fetchone()
+        if pay_row:
+             log_activity(pay_row[2], 'PAYMENT', f"Rejected payment of ₹{pay_row[0]} from {pay_row[1]}", {'payment_id': payment_id})
+             
         conn.commit()
         flash("Payment rejected.", "info")
     except Exception as e:
@@ -557,6 +534,10 @@ def owner_add_tenant():
             """, (owner_id, full_name, email, phone, room_no, room_id, rent, status, bed_no, move_in_date))
             
             conn.commit()
+            
+            # Log Activity
+            log_activity(owner_id, 'TENANT_ADD', f"Added new tenant {full_name} to Room {room_no}", {'room': room_no})
+            
             if status == 'DRAFT':
                 flash("Tenant details saved as Draft.", "success")
             else:
@@ -1525,6 +1506,10 @@ def add_notice():
         """, (owner_id, title, description, priority))
         
         conn.commit()
+        
+        # Log Activity
+        log_activity(owner_id, 'NOTICE', f"Posted notice: {title}", {'priority': priority})
+        
         flash("Notice posted successfully!", "success")
     except Exception as e:
         conn.rollback()
