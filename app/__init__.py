@@ -10,9 +10,20 @@ def create_app():
     app.secret_key = os.environ.get('SECRET_KEY') or 'dev_secret_key_change_in_production'
 
     # Register blueprints
-    # Register blueprints
     from .blueprints import bp as main_bp
     app.register_blueprint(main_bp)
+    
+    # Mail Config (Optimistic Gmail or Console)
+    app.config['MAIL_SERVER'] = 'smtp.gmail.com'
+    app.config['MAIL_PORT'] = 587
+    app.config['MAIL_USE_TLS'] = True
+    app.config['MAIL_USERNAME'] = os.environ.get('MAIL_USERNAME')
+    app.config['MAIL_PASSWORD'] = os.environ.get('MAIL_PASSWORD')
+    app.config['MAIL_DEFAULT_SENDER'] = os.environ.get('MAIL_USERNAME')
+
+    # Initialize extensions if needed (using a simple helper for now or actual Flask-Mail)
+    # For now, we will use a helper function in auth.py to send emails, 
+    # but we can store the config here.
 
     @app.template_filter('time_ago')
     def time_ago(dt):
