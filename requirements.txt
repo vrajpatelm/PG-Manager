@@ -1,3 +1,7 @@
 Flask>=2.2
 python-dotenv>=0.21
+psycopg2-binary>=2.9
+Flask-Mail
 qrcode[pil]
+requests
+gunicorn
