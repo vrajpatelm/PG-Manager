@@ -2,9 +2,10 @@ import json
 import io
 import psycopg2
 from datetime import datetime, timedelta, timezone, date as d
-from flask import render_template, request, redirect, url_for, session, flash, Response, send_file
+from flask import render_template, request, redirect, url_for, session, flash, Response, send_file, current_app
 from app.database.database import get_db_connection
 from app.utils.decorators import role_required
+from app.utils.mailer import send_email
 from . import bp
 
 @bp.route('/owner/dashboard')
@@ -857,7 +858,6 @@ def owner_qr_image(owner_id):
 @bp.route('/owner/tenants/update-status', methods=['POST'])
 @role_required('OWNER')
 def update_tenant_status():
-    
     tenant_id = request.form.get('tenant_id')
     new_status = request.form.get('status')
     
@@ -867,13 +867,42 @@ def update_tenant_status():
         if new_status == 'REJECTED':
              cur.execute("DELETE FROM tenants WHERE id = %s", (tenant_id,))
              flash("Draft tenant rejected and removed.", "success")
+        elif new_status == 'ACTIVE':
+             # Fetch tenant and property info for Welcome Kit
+             cur.execute("""
+                 SELECT t.full_name, t.email, t.room_number, p.name, p.wifi_ssid, p.wifi_password, 
+                        p.gate_closing_time, p.house_rules
+                 FROM tenants t
+                 JOIN properties p ON t.owner_id = p.owner_id
+                 WHERE t.id = %s
+             """, (tenant_id,))
+             t_data = cur.fetchone()
+             
+             cur.execute("UPDATE tenants SET onboarding_status = 'ACTIVE' WHERE id = %s", (tenant_id,))
+             conn.commit()
+             
+             if t_data and t_data[1]: # If they have an email
+                 send_email(
+                     to_email=t_data[1],
+                     subject=f"Welcome to {t_data[3]}!",
+                     template="emails/welcome_kit.html",
+                     tenant_name=t_data[0],
+                     room_number=t_data[2],
+                     property_name=t_data[3],
+                     wifi_ssid=t_data[4],
+                     wifi_password=t_data[5],
+                     gate_closing_time=t_data[6],
+                     house_rules=t_data[7]
+                 )
+             flash("Tenant activated! Welcome Kit sent.", "success")
         else:
              cur.execute("UPDATE tenants SET onboarding_status = %s WHERE id = %s", (new_status, tenant_id))
+             conn.commit()
              flash(f"Tenant status updated to {new_status}", "success")
              
-        conn.commit()
     except Exception as e:
         conn.rollback()
+        print(f"Error updating status: {e}")
         flash("Failed to update status", "error")
     finally:
         cur.close()
@@ -881,7 +910,61 @@ def update_tenant_status():
         
     return redirect(url_for('main.owner_tenants'))
 
-@bp.route('/owner/tenants/<int:tenant_id>')
+@bp.route('/owner/tenants/remind/<tenant_id>', methods=['POST'])
+@role_required('OWNER')
+def remind_tenant(tenant_id):
+    method = request.form.get('method') # 'email' or 'whatsapp'
+    
+    conn = get_db_connection()
+    cur = conn.cursor()
+    try:
+        cur.execute("""
+            SELECT t.full_name, t.email, t.phone_number, t.room_number, t.monthly_rent, o.full_name, p.name
+            FROM tenants t
+            JOIN owners o ON t.owner_id = o.id
+            JOIN properties p ON t.owner_id = p.owner_id
+            WHERE t.id = %s
+        """, (tenant_id,))
+        row = cur.fetchone()
+        
+        if not row:
+            flash("Tenant not found", "error")
+            return redirect(url_for('main.owner_tenants'))
+            
+        t_name, t_email, t_phone, t_room, t_rent, o_name, p_name = row
+        
+        if method == 'email':
+            if not t_email:
+                flash("Tenant has no email address", "error")
+            else:
+                success = send_email(
+                    to_email=t_email,
+                    subject=f"Rent Reminder - {p_name}",
+                    template="emails/rent_reminder.html",
+                    tenant_name=t_name,
+                    rent_amount=t_rent,
+                    room_number=t_room,
+                    payment_month=datetime.now().strftime('%B %Y'),
+                    owner_name=o_name,
+                    dashboard_url=url_for('main.tenant_dashboard', _external=True)
+                )
+                if success: flash(f"Reminder email sent to {t_name}", "success")
+                else: flash("Failed to send email", "error")
+        
+        elif method == 'whatsapp':
+            # This is handled client-side but we could log it here if needed
+            flash("WhatsApp reminder link generated", "success")
+
+    except Exception as e:
+        print(f"Remind Error: {e}")
+        flash("Error processing reminder", "error")
+    finally:
+        cur.close()
+        conn.close()
+        
+    return redirect(url_for('main.owner_tenants'))
+
+@bp.route('/owner/tenants/<tenant_id>')
 @role_required('OWNER')
 def owner_tenant_details(tenant_id):
     return render_template('owner/tenant_details.html', tenant_id=tenant_id)

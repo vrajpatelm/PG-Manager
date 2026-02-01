@@ -58,15 +58,6 @@
         </div>
     </header>
 
-    {% with messages = get_flashed_messages(with_categories=true) %}
-        {% if messages %}
-            {% for category, message in messages %}
-            <div class="mb-6 p-4 rounded-xl flex items-center gap-3 {% if category == 'success' %}bg-green-50 text-green-700{% else %}bg-red-50 text-red-700{% endif %}">
-                <p class="text-sm font-medium">{{ message }}</p>
-            </div>
-            {% endfor %}
-        {% endif %}
-    {% endwith %}
 
     <!-- Tabs -->
     <div class="flex items-center gap-8 border-b border-gray-200 mb-6" x-data="{ tab: 'income' }">

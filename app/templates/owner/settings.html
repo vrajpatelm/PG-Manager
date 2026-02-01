@@ -171,23 +171,6 @@
             <!-- Content Area -->
             <form action="{{ url_for('main.owner_settings_update') }}" method="POST" enctype="multipart/form-data" class="flex-1 p-6 md:p-8 relative flex flex-col">
                 
-                <!-- Flash Messages -->
-                {% with messages = get_flashed_messages(with_categories=true) %}
-                  {% if messages %}
-                    <div class="mb-6 space-y-2">
-                    {% for category, message in messages %}
-                      <div class="p-4 rounded-xl flex items-center gap-3 {% if category == 'success' %}bg-green-50 text-green-700 border border-green-100{% else %}bg-red-50 text-red-700 border border-red-100{% endif %}">
-                          {% if category == 'success' %}
-                            <svg class="w-5 h-5 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
-                          {% else %}
-                            <svg class="w-5 h-5 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                          {% endif %}
-                          <p class="text-sm font-medium">{{ message }}</p>
-                      </div>
-                    {% endfor %}
-                    </div>
-                  {% endif %}
-                {% endwith %}
 
                 <!-- Tab: Profile -->
                 <div id="tab-profile" class="tab-content space-y-6">

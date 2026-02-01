@@ -25,28 +25,6 @@
         </div>
     </header>
 
-    <!-- Flash Messages -->
-    {% with messages = get_flashed_messages(with_categories=true) %}
-      {% if messages %}
-        <div class="mb-4 space-y-2">
-          {% for category, message in messages %}
-            <div class="p-4 rounded-xl text-sm font-medium flex items-center gap-2
-                {% if category == 'error' %} bg-red-50 text-red-600 border border-red-100
-                {% elif category == 'success' %} bg-green-50 text-green-600 border border-green-100
-                {% else %} bg-blue-50 text-blue-600 border border-blue-100 {% endif %}">
-              {% if category == 'error' %}
-                <svg class="w-5 h-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-              {% elif category == 'success' %}
-                 <svg class="w-5 h-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
-              {% else %}
-                  <svg class="w-5 h-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-              {% endif %}
-              <span>{{ message }}</span>
-            </div>
-          {% endfor %}
-        </div>
-      {% endif %}
-    {% endwith %}
 
     <!-- Stats Row (Optional quick glance) -->
     <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
