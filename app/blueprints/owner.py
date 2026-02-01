@@ -5,10 +5,12 @@ from datetime import datetime, timedelta, timezone, date as d
 from flask import render_template, request, redirect, url_for, session, flash, Response, send_file
 from app.database.database import get_db_connection
 from . import bp
+from app.utils.decorators import login_required, role_required
 
 @bp.route('/owner/dashboard')
+@login_required
+@role_required('OWNER')
 def owner_dashboard():
-    if session.get('role') != 'OWNER': return redirect(url_for('main.login'))
     
     conn = get_db_connection()
     if not conn: 
@@ -269,8 +271,9 @@ def owner_dashboard():
         conn.close()
 
 @bp.route('/owner/payment/approve/<payment_id>', methods=['POST'])
+@login_required
+@role_required('OWNER')
 def approve_payment(payment_id):
-    if session.get('role') != 'OWNER': return redirect(url_for('main.login'))
     
     conn = get_db_connection()
     cur = conn.cursor()
@@ -287,8 +290,9 @@ def approve_payment(payment_id):
     return redirect(url_for('main.owner_dashboard'))
 
 @bp.route('/owner/payment/reject/<payment_id>', methods=['POST'])
+@login_required
+@role_required('OWNER')
 def reject_payment(payment_id):
-    if session.get('role') != 'OWNER': return redirect(url_for('main.login'))
     
     conn = get_db_connection()
     cur = conn.cursor()
@@ -306,8 +310,9 @@ def reject_payment(payment_id):
 
 
 @bp.route('/owner/tenants')
+@login_required
+@role_required('OWNER')
 def owner_tenants():
-    if session.get('role') != 'OWNER': return redirect(url_for('main.login'))
     
     conn = get_db_connection()
     if not conn:
@@ -435,8 +440,9 @@ def owner_tenants():
         conn.close()
 
 @bp.route('/owner/add-tenant', methods=['GET', 'POST'])
+@login_required
+@role_required('OWNER')
 def owner_add_tenant():
-    if session.get('role') != 'OWNER': return redirect(url_for('main.login'))
     
     if request.method == 'POST':
         full_name = request.form.get('full_name')
@@ -571,8 +577,9 @@ def owner_add_tenant():
 
 
 @bp.route('/owner/settings')
+@login_required
+@role_required('OWNER')
 def owner_settings():
-    if session.get('role') != 'OWNER': return redirect(url_for('main.login'))
     
     conn = get_db_connection()
     cur = conn.cursor()
@@ -639,8 +646,9 @@ def owner_settings():
         conn.close()
 
 @bp.route('/owner/settings/update', methods=['POST'])
+@login_required
+@role_required('OWNER')
 def owner_settings_update():
-    if session.get('role') != 'OWNER': return redirect(url_for('main.login'))
     
     def clean(val):
         return val if val and val.strip() != "" else None
@@ -746,8 +754,9 @@ def owner_settings_update():
 
 
 @bp.route('/owner/export/tenants')
+@login_required
+@role_required('OWNER')
 def export_tenants():
-    if session.get('role') != 'OWNER': return redirect(url_for('main.login'))
     
     import csv
     

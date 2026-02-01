@@ -4,11 +4,12 @@
 ### ✅ OTP Verification for Signup
 - **Goal**: Verify email ownership before creating accounts.
 - **Flow**: User enters details -> System sends OTP to email -> User enters OTP -> Account Created.
-- **Status**: *In Progress*
+- **Status**: **Completed**
 
-### 🔒 Password Reset Flow
+### ✅ Password Reset Flow
 - **Goal**: Allow users to recover lost passwords via email.
 - **Implementation**: "Forgot Password" link -> Email with unique link/token -> New Password form.
+- **Status**: **Completed**
 
 ### 🛡️ Security Decorators
 - **Goal**: Centralize role-based access control.

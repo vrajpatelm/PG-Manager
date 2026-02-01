@@ -12,6 +12,7 @@ from email.mime.multipart import MIMEMultipart
 from . import bp
 
 from app.utils.email_service import send_otp_email, send_reset_email
+from app.utils.decorators import prevent_authenticated, login_required
 
 @bp.route('/auth/send-otp', methods=['POST'])
 def send_otp():
@@ -56,6 +57,7 @@ def send_otp():
         conn.close()
 
 @bp.route('/login', methods=['GET', 'POST'])
+@prevent_authenticated
 def login():
     if request.method == 'POST':
         email = request.form.get('email')
@@ -108,6 +110,7 @@ def login():
 
 
 @bp.route('/signup', methods=['GET', 'POST'])
+@prevent_authenticated
 def signup():
     if request.method == 'POST':
         # Support both JSON (API) and Form Data (Classic)
@@ -251,6 +254,7 @@ def signup():
 
 
 @bp.route('/logout')
+@login_required
 def logout():
     session.clear()
     return redirect(url_for('main.login'))
@@ -258,6 +262,7 @@ def logout():
 
 
 @bp.route('/auth/forgot-password', methods=['GET', 'POST'])
+@prevent_authenticated
 def forgot_password():
     if request.method == 'POST':
         email = request.form.get('email')
@@ -299,6 +304,7 @@ def forgot_password():
     return render_template('forgot_password.html')
 
 @bp.route('/auth/reset-password/<token>', methods=['GET', 'POST'])
+@prevent_authenticated
 def reset_password(token):
     conn = get_db_connection()
     cur = conn.cursor()

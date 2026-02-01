@@ -1,16 +1,13 @@
 from flask import render_template, session, redirect, url_for, request, flash, current_app
 from . import bp
+from app.utils.decorators import prevent_authenticated
 import os
 from werkzeug.utils import secure_filename
 from app.database.database import get_db_connection
 
 @bp.route("/")
+@prevent_authenticated
 def index():
-    if 'user_id' in session:
-        if session.get('role') == 'OWNER':
-            return redirect(url_for('main.owner_dashboard'))
-        elif session.get('role') == 'TENANT':
-             return redirect(url_for('main.tenant_dashboard'))
             
     return render_template("index.html")
 
