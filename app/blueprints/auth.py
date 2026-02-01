@@ -1,3 +1,4 @@
+import traceback
 from flask import render_template, request, redirect, url_for, session, flash
 from werkzeug.security import generate_password_hash, check_password_hash
 from app.database.database import get_db_connection
