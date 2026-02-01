@@ -23,14 +23,30 @@
     - Owner Dashboard: "Post Notice" (Title, Body, Priority).
     - Tenant Dashboard: "Notices" widget with "New" badges.
 
-## 3. Data & Management
-### 📂 Document Vault
-- **Goal**: Secure storage for important agreements and IDs.
+## 3. Data & Management (Refined)
+### �️ Asset & Inventory Management
+- **Goal**: Track property assets and their health (Furniture, ACs, Geysers).
 - **Features**:
-    - **Owner**: Upload Rental Templates, Property Docs.
-    - **Tenant**: Upload ID Proofs (Aadhar/PAN).
-    - **Shared**: View signed Rental Agreement.
+    - **Inventory List**: Track items per room (e.g., Room 101: 2 Beds, 1 Study Table).
+    - **Maintenance Log**: Record service dates (e.g., AC servicing history).
+    - **Repair Tracking**: Link repairs to specific assets for cost analysis.
 
-### 📝 Visitor Log
-- **Goal**: Track guests entering/exiting the PG.
-- **Features**: Digital entry for visitors (Name, Whom to visit, Time In/Out).
+### 📊 Advanced Financial Analytics
+- **Goal**: Deeper business insights for property owners.
+- **Features**:
+    - **Revenue Trends**: Monthly/Quarterly profit charts and predictive income.
+    - **Late Fee Engine**: Automated calculation of penalties for overdue rent.
+    - **Digital Receipts**: One-click PDF generation for tenant rent receipts.
+
+## 4. Communication & Automation (Improvements)
+### ⚡ Automated Reminders
+- **Goal**: Reduce manual effort in rent collection.
+- **Features**:
+    - **One-Click Notify**: Send rent reminders via Email/WhatsApp from the Tenant List.
+    - **Auto-Onboarding**: Send a digital "Welcome Kit" (WiFi, Rules) immediately upon marking a tenant as ACTIVE.
+
+### 🔧 Maintenance Solutions
+- **Goal**: Integrated complaint and cost management.
+- **Features**:
+    - **Technician Directory**: Save local contacts for plumbers, electricians, etc.
+    - **Expense Linkage**: Automatically link complaint resolution costs to the Finance module.

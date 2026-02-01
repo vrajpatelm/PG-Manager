@@ -63,18 +63,36 @@
                                       <form action="{{ url_for('main.update_tenant_status') }}" method="POST" class="inline">
                                           <input type="hidden" name="tenant_id" value="{{ tenant.id }}">
                                           <input type="hidden" name="status" value="PENDING">
-                                          <button type="submit" class="text-xs font-bold text-white bg-green-500 hover:bg-green-600 px-3 py-1.5 rounded-lg shadow-sm transition-colors" title="Finalize Admission"> Admit </button>
+                                          <button type="submit" class="cursor-pointer text-xs font-bold text-white bg-green-500 hover:bg-green-600 px-3 py-1.5 rounded-lg shadow-sm transition-colors" title="Finalize Admission"> Admit </button>
                                       </form>
                                       <form action="{{ url_for('main.update_tenant_status') }}" method="POST" class="inline" onsubmit="return confirm('Are you sure you want to reject this draft?');">
                                           <input type="hidden" name="tenant_id" value="{{ tenant.id }}">
                                           <input type="hidden" name="status" value="REJECTED">
-                                          <button type="submit" class="text-xs font-bold text-red-600 bg-red-50 hover:bg-red-100 border border-red-200 px-3 py-1.5 rounded-lg transition-colors" title="Reject Draft"> Reject </button>
+                                          <button type="submit" class="cursor-pointer text-xs font-bold text-red-600 bg-red-50 hover:bg-red-100 border border-red-200 px-3 py-1.5 rounded-lg transition-colors" title="Reject Draft"> Reject </button>
                                       </form>
                                   </div>
                                   {% endif %}
-                                  <a href="#" class="p-2 text-slate-400 hover:text-brand1 transition-colors"><svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" /></svg></a>
-                                  <a href="/owner/tenants/{{ tenant.id }}" class="p-2 text-slate-400 hover:text-brand1 transition-colors"><svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg></a>
-                                  <a href="#" class="p-2 text-slate-400 hover:text-brand1 transition-colors"><svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" /></svg></a>
+                                  
+                                  {% if tenant.status == 'ACTIVE' %}
+                                  <!-- Email Reminder -->
+                                  <form action="{{ url_for('main.remind_tenant', tenant_id=tenant.id) }}" method="POST" class="inline">
+                                      <input type="hidden" name="method" value="email">
+                                      <button type="submit" class="cursor-pointer p-2 text-slate-400 hover:text-blue-500 transition-colors" title="Send Email Reminder">
+                                          <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>
+                                      </button>
+                                  </form>
+                                  
+                                  <!-- WhatsApp Reminder -->
+                                  {% if tenant.phone %}
+                                  <a href="https://wa.me/91{{ tenant.phone }}?text=Hi%20{{ tenant.full_name | urlencode }}%2C%20this%20is%20a%20friendly%20reminder%20regarding%20your%20rent%20due%20for%20this%20month.%20Kindly%20clear%20it%20at%20your%20earliest%20convenience.%20Thanks!" 
+                                     target="_blank" class="p-2 text-slate-400 hover:text-green-500 transition-colors" title="Send WhatsApp Reminder">
+                                      <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" /></svg>
+                                  </a>
+                                  {% endif %}
+                                  {% endif %}
+
+                                  <a href="/owner/tenants/{{ tenant.id }}" class="p-2 text-slate-400 hover:text-brand1 transition-colors" title="View Details"><svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg></a>
+                                  <a href="#" class="p-2 text-slate-400 hover:text-brand1 transition-colors" title="Edit"><svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" /></svg></a>
                                 </div>
                             </td>
                         </tr>

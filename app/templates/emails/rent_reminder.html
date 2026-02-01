@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        .container { max-width: 600px; margin: 40px auto; background: #ffffff; border-radius: 16px; overflow: hidden; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+        .banner { background: #D61C4E; height: 8px; }
+        .body { padding: 48px; }
+        .amount-box { background: #FFF1F2; border: 1px solid #FECDD3; border-radius: 12px; padding: 24px; text-align: center; margin: 32px 0; }
+        .amount { font-size: 32px; font-weight: 800; color: #9F1239; margin: 8px 0; }
+        .btn { display: inline-block; background: #1E293B; color: #ffffff; padding: 16px 32px; border-radius: 12px; text-decoration: none; font-weight: bold; margin-top: 24px; }
+        .footer { padding: 24px; text-align: center; background: #F8FAFC; color: #94A3B8; font-size: 12px; }
+    </style>
+</head>
+<body style="background: #F1F5F9; margin: 0; padding: 0;">
+    <div class="container">
+        <div class="banner"></div>
+        <div class="body">
+            <h2 style="color: #1E293B; margin-top: 0;">Rent Reminder</h2>
+            <p style="color: #64748B; font-size: 16px; line-height: 24px;">Hi {{ tenant_name }}, this is a friendly reminder regarding your rent payment for <strong>{{ payment_month }}</strong>.</p>
+            
+            <div class="amount-box">
+                <p style="margin: 0; font-size: 14px; text-transform: uppercase; letter-spacing: 0.05em; color: #E11D48; font-weight: 700;">Outstanding Amount</p>
+                <div class="amount">₹{{ rent_amount }}</div>
+                <p style="margin: 0; font-size: 13px; color: #BE123C;">Room {{ room_number }}</p>
+            </div>
+
+            <p style="color: #64748B; font-size: 14px;">Kindly clear the dues at your earliest convenience to avoid any late charges.</p>
+            
+            <a href="{{ dashboard_url }}" class="btn">View Dashboard</a>
+        </div>
+        <div class="footer">
+            Sent via <strong>PG-Manager</strong> on behalf of {{ owner_name }}.
+        </div>
+    </div>
+</body>
+</html>

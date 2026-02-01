@@ -1,10 +1,13 @@
 import json
 import io
+import threading
 import psycopg2
 from datetime import datetime, timedelta, timezone, date as d
-from flask import render_template, request, redirect, url_for, session, flash, Response, send_file
+from flask import render_template, request, redirect, url_for, session, flash, Response, send_file, current_app
 from app.database.database import get_db_connection
 from app.utils.decorators import role_required
+from app.utils.mailer import send_email
+from app.utils.activity import log_activity
 from . import bp
 
 @bp.route('/owner/dashboard')
@@ -185,40 +188,37 @@ def owner_dashboard():
         high_priority_count = cur.fetchone()[0] or 0
 
         cur.execute("""
-            SELECT type, title, description, created_at, metadata FROM (
-                SELECT 'PAYMENT' as type, 
-                       'Rent Received' as title, 
-                       'From ' || t.full_name || ' (₹' || p.amount || ')' as description, 
-                       p.created_at,
-                       'green' as metadata
-                FROM payments p 
-                JOIN tenants t ON p.tenant_id = t.id 
-                WHERE t.owner_id = %s
-                
-                UNION ALL
-                
-                SELECT 'MOVEMENT' as type, 
-                       'New Tenant' as title, 
-                       full_name || ' joined Room ' || room_number as description, 
-                       created_at,
-                       'blue' as metadata
-                FROM tenants 
-                WHERE owner_id = %s
-                
-                UNION ALL
-                
-                SELECT 'COMPLAINT' as type, 
-                       'New Complaint' as title, 
-                       title || ' in Room ' || (SELECT room_number FROM tenants WHERE id = complaints.tenant_id) as description, 
-                       created_at,
-                       'red' as metadata
-                FROM complaints 
-                WHERE owner_id = %s
-            ) as activity
-            ORDER BY created_at DESC
-            LIMIT 5
-        """, (owner_id, owner_id, owner_id))
-        recent_activity = cur.fetchall()
+            SELECT id, title, description, priority, created_at 
+            FROM notices 
+            WHERE owner_id = %s 
+            ORDER BY created_at DESC 
+            LIMIT 3
+        """, (owner_id,))
+        recent_notices = []
+        for row in cur.fetchall():
+            recent_notices.append({
+                'id': row[0],
+                'title': row[1],
+                'description': row[2],
+                'priority': row[3],
+                'created_at': row[4]
+            })
+
+        cur.execute("""
+            SELECT event_type, description, created_at, metadata 
+            FROM activity_logs 
+            WHERE owner_id = %s 
+            ORDER BY created_at DESC 
+            LIMIT 10
+        """, (owner_id,))
+        recent_activity = []
+        for row in cur.fetchall():
+            recent_activity.append({
+                'type': row[0],
+                'description': row[1],
+                'created_at': row[2],
+                'metadata': row[3] if row[3] else {}
+            })
         
         return render_template('owner/dashboard.html', 
                              name=session.get('name', 'Owner'),
@@ -240,6 +240,7 @@ def owner_dashboard():
                              pending_approvals=pending_approvals,
                              total_pending_count=total_pending_count,
                              high_priority_count=high_priority_count,
+                             recent_notices=recent_notices,
                              recent_activity=recent_activity)
                              
     except Exception as e:
@@ -264,6 +265,7 @@ def owner_dashboard():
                              pending_complaints=[],
                              pending_approvals=[],
                              high_priority_count=0,
+                             recent_notices=[],
                              recent_activity=[])
     finally:
         cur.close()
@@ -277,6 +279,13 @@ def approve_payment(payment_id):
     cur = conn.cursor()
     try:
         cur.execute("UPDATE payments SET status = 'COMPLETED' WHERE id = %s", (payment_id,))
+        
+        # Log Activity
+        cur.execute("SELECT p.amount, t.full_name, t.owner_id FROM payments p JOIN tenants t ON p.tenant_id = t.id WHERE p.id = %s", (payment_id,))
+        pay_row = cur.fetchone()
+        if pay_row:
+             log_activity(pay_row[2], 'PAYMENT', f"Verified payment of ₹{pay_row[0]} from {pay_row[1]}", {'payment_id': payment_id})
+
         conn.commit()
         flash("Payment verified successfully!", "success")
     except Exception as e:
@@ -295,6 +304,13 @@ def reject_payment(payment_id):
     cur = conn.cursor()
     try:
         cur.execute("UPDATE payments SET status = 'FAILED' WHERE id = %s", (payment_id,))
+        
+        # Log Activity
+        cur.execute("SELECT p.amount, t.full_name, t.owner_id FROM payments p JOIN tenants t ON p.tenant_id = t.id WHERE p.id = %s", (payment_id,))
+        pay_row = cur.fetchone()
+        if pay_row:
+             log_activity(pay_row[2], 'PAYMENT', f"Rejected payment of ₹{pay_row[0]} from {pay_row[1]}", {'payment_id': payment_id})
+             
         conn.commit()
         flash("Payment rejected.", "info")
     except Exception as e:
@@ -518,6 +534,10 @@ def owner_add_tenant():
             """, (owner_id, full_name, email, phone, room_no, room_id, rent, status, bed_no, move_in_date))
             
             conn.commit()
+            
+            # Log Activity
+            log_activity(owner_id, 'TENANT_ADD', f"Added new tenant {full_name} to Room {room_no}", {'room': room_no})
+            
             if status == 'DRAFT':
                 flash("Tenant details saved as Draft.", "success")
             else:
@@ -820,7 +840,6 @@ def owner_qr_image(owner_id):
 @bp.route('/owner/tenants/update-status', methods=['POST'])
 @role_required('OWNER')
 def update_tenant_status():
-    
     tenant_id = request.form.get('tenant_id')
     new_status = request.form.get('status')
     
@@ -830,13 +849,42 @@ def update_tenant_status():
         if new_status == 'REJECTED':
              cur.execute("DELETE FROM tenants WHERE id = %s", (tenant_id,))
              flash("Draft tenant rejected and removed.", "success")
+        elif new_status == 'ACTIVE':
+             # Fetch tenant and property info for Welcome Kit
+             cur.execute("""
+                 SELECT t.full_name, t.email, t.room_number, p.name, p.wifi_ssid, p.wifi_password, 
+                        p.gate_closing_time, p.house_rules
+                 FROM tenants t
+                 JOIN properties p ON t.owner_id = p.owner_id
+                 WHERE t.id = %s
+             """, (tenant_id,))
+             t_data = cur.fetchone()
+             
+             cur.execute("UPDATE tenants SET onboarding_status = 'ACTIVE' WHERE id = %s", (tenant_id,))
+             conn.commit()
+             
+             if t_data and t_data[1]: # If they have an email
+                 send_email(
+                     to_email=t_data[1],
+                     subject=f"Welcome to {t_data[3]}!",
+                     template="emails/welcome_kit.html",
+                     tenant_name=t_data[0],
+                     room_number=t_data[2],
+                     property_name=t_data[3],
+                     wifi_ssid=t_data[4],
+                     wifi_password=t_data[5],
+                     gate_closing_time=t_data[6],
+                     house_rules=t_data[7]
+                 )
+             flash("Tenant activated! Welcome Kit sent.", "success")
         else:
              cur.execute("UPDATE tenants SET onboarding_status = %s WHERE id = %s", (new_status, tenant_id))
+             conn.commit()
              flash(f"Tenant status updated to {new_status}", "success")
              
-        conn.commit()
     except Exception as e:
         conn.rollback()
+        print(f"Error updating status: {e}")
         flash("Failed to update status", "error")
     finally:
         cur.close()
@@ -844,7 +892,154 @@ def update_tenant_status():
         
     return redirect(url_for('main.owner_tenants'))
 
-@bp.route('/owner/tenants/<int:tenant_id>')
+@bp.route('/owner/tenants/remind/<tenant_id>', methods=['POST'])
+@role_required('OWNER')
+def remind_tenant(tenant_id):
+    method = request.form.get('method') # 'email' or 'whatsapp'
+    
+    conn = get_db_connection()
+    cur = conn.cursor()
+    try:
+        cur.execute("""
+            SELECT t.full_name, t.email, t.phone_number, t.room_number, t.monthly_rent, o.full_name, p.name
+            FROM tenants t
+            JOIN owners o ON t.owner_id = o.id
+            JOIN properties p ON t.owner_id = p.owner_id
+            WHERE t.id = %s
+        """, (tenant_id,))
+        row = cur.fetchone()
+        
+        if not row:
+            flash("Tenant not found", "error")
+            return redirect(url_for('main.owner_tenants'))
+            
+        t_name, t_email, t_phone, t_room, t_rent, o_name, p_name = row
+        
+        if method == 'email':
+            if not t_email:
+                flash("Tenant has no email address", "error")
+            else:
+                success = send_email(
+                    to_email=t_email,
+                    subject=f"Rent Reminder - {p_name}",
+                    template="emails/rent_reminder.html",
+                    tenant_name=t_name,
+                    rent_amount=t_rent,
+                    room_number=t_room,
+                    payment_month=datetime.now().strftime('%B %Y'),
+                    owner_name=o_name,
+                    dashboard_url=url_for('main.tenant_dashboard', _external=True)
+                )
+                if success: flash(f"Reminder email sent to {t_name}", "success")
+                else: flash("Failed to send email", "error")
+        
+        elif method == 'whatsapp':
+            # This is handled client-side but we could log it here if needed
+            flash("WhatsApp reminder link generated", "success")
+
+    except Exception as e:
+        print(f"Remind Error: {e}")
+        flash("Error processing reminder", "error")
+    finally:
+        cur.close()
+        conn.close()
+        
+    return redirect(url_for('main.owner_tenants'))
+
+    return redirect(url_for('main.owner_tenants'))
+
+def process_bulk_reminders(app, user_id, dashboard_url):
+    """Background worker for sending bulk reminders"""
+    with app.app_context():
+        conn = get_db_connection()
+        cur = conn.cursor()
+        try:
+            print(f"Starting bulk reminder process for User {user_id}")
+            current_month = datetime.now().strftime('%B %Y')
+            
+            # 1. Get Owner & Property Info
+            cur.execute("""
+                SELECT o.id, o.full_name, p.name 
+                FROM owners o
+                JOIN properties p ON o.id = p.owner_id
+                WHERE o.user_id = %s
+                LIMIT 1
+            """, (user_id,))
+            owner_data = cur.fetchone()
+            
+            if not owner_data:
+                print("Owner not found in background task")
+                return
+                
+            owner_id, owner_name, property_name = owner_data
+            
+            # 2. Get active tenants
+            cur.execute("""
+                SELECT t.id, t.full_name, t.email, t.room_number, t.monthly_rent
+                FROM tenants t
+                WHERE t.owner_id = %s AND t.onboarding_status = 'ACTIVE'
+            """, (owner_id,))
+            
+            tenants = cur.fetchall()
+            
+            count = 0
+            for t in tenants:
+                t_id, t_name, t_email, t_room, t_rent = t
+                
+                # Check payment status
+                cur.execute("""
+                    SELECT id FROM payments 
+                    WHERE tenant_id = %s 
+                    AND EXTRACT(MONTH FROM payment_date) = EXTRACT(MONTH FROM CURRENT_DATE)
+                    AND EXTRACT(YEAR FROM payment_date) = EXTRACT(YEAR FROM CURRENT_DATE)
+                    AND status = 'APPROVED'
+                """, (t_id,))
+                
+                if cur.fetchone():
+                    continue 
+                    
+                if t_email:
+                    try:
+                        send_email(
+                            to_email=t_email,
+                            subject=f"Rent Reminder - {property_name}",
+                            template="emails/rent_reminder.html",
+                            tenant_name=t_name,
+                            rent_amount=t_rent,
+                            room_number=t_room,
+                            payment_month=current_month,
+                            owner_name=owner_name,
+                            dashboard_url=dashboard_url
+                        )
+                        count += 1
+                    except Exception as email_err:
+                        print(f"Failed to send to {t_email}: {email_err}")
+            
+            print(f"Bulk Process Complete. Sent {count} emails.")
+
+        except Exception as e:
+            print(f"Bulk Reminder Background Error: {e}")
+        finally:
+            cur.close()
+            conn.close()
+
+@bp.route('/owner/tenants/remind-all', methods=['POST'])
+@role_required('OWNER')
+def remind_all_tenants():
+    # Capture legitimate app object and context data
+    app = current_app._get_current_object()
+    user_id = session.get('user_id')
+    dashboard_url = url_for('main.tenant_dashboard', _external=True)
+    
+    # Spawn background thread
+    thread = threading.Thread(target=process_bulk_reminders, args=(app, user_id, dashboard_url))
+    thread.daemon = True
+    thread.start()
+    
+    flash("Background process started! Emails are being sent.", "success")
+    return redirect(request.referrer or url_for('main.owner_dashboard'))
+
+@bp.route('/owner/tenants/<tenant_id>')
 @role_required('OWNER')
 def owner_tenant_details(tenant_id):
     return render_template('owner/tenant_details.html', tenant_id=tenant_id)
@@ -1245,3 +1440,110 @@ def resolve_complaint(complaint_id):
         conn.close()
         
     return redirect(url_for('main.owner_complaints', status='PENDING'))
+
+@bp.route('/owner/notices')
+@role_required('OWNER')
+def owner_notices():
+    conn = get_db_connection()
+    cur = conn.cursor()
+    notices = []
+    try:
+        cur.execute("SELECT id FROM owners WHERE user_id = %s", (session.get('user_id'),))
+        row = cur.fetchone()
+        if not row:
+            return render_template('owner/notices.html', notices=[])
+        
+        owner_id = row[0]
+        
+        cur.execute("""
+            SELECT id, title, description, priority, created_at 
+            FROM notices 
+            WHERE owner_id = %s 
+            ORDER BY created_at DESC
+        """, (owner_id,))
+        
+        for row in cur.fetchall():
+            notices.append({
+                'id': row[0],
+                'title': row[1],
+                'description': row[2],
+                'priority': row[3],
+                'created_at': row[4]
+            })
+            
+    except Exception as e:
+        print(f"Error fetching notices: {e}")
+        notices = []
+    finally:
+        cur.close()
+        conn.close()
+        
+    return render_template('owner/notices.html', notices=notices)
+
+    return redirect(url_for('main.owner_notices'))
+
+@bp.route('/owner/notices/add', methods=['POST'])
+@role_required('OWNER')
+def add_notice():
+    title = request.form.get('title')
+    description = request.form.get('description')
+    priority = request.form.get('priority')
+    
+    conn = get_db_connection()
+    cur = conn.cursor()
+    try:
+        cur.execute("SELECT id FROM owners WHERE user_id = %s", (session.get('user_id'),))
+        row = cur.fetchone()
+        if not row:
+            flash("Owner profile not found", "error")
+            return redirect(url_for('main.owner_notices'))
+            
+        owner_id = row[0]
+        
+        cur.execute("""
+            INSERT INTO notices (owner_id, title, description, priority)
+            VALUES (%s, %s, %s, %s)
+        """, (owner_id, title, description, priority))
+        
+        conn.commit()
+        
+        # Log Activity
+        log_activity(owner_id, 'NOTICE', f"Posted notice: {title}", {'priority': priority})
+        
+        flash("Notice posted successfully!", "success")
+    except Exception as e:
+        conn.rollback()
+        print(f"Error posting notice: {e}")
+        flash("Failed to post notice", "error")
+    finally:
+        cur.close()
+        conn.close()
+        
+    return redirect(url_for('main.owner_notices'))
+
+@bp.route('/owner/notices/delete/<notice_id>', methods=['POST'])
+@role_required('OWNER')
+def delete_notice(notice_id):
+    conn = get_db_connection()
+    cur = conn.cursor()
+    try:
+        # Check if the notice belongs to the owner
+        cur.execute("SELECT id FROM owners WHERE user_id = %s", (session.get('user_id'),))
+        owner_id = cur.fetchone()[0]
+        
+        cur.execute("DELETE FROM notices WHERE id = %s AND owner_id = %s", (notice_id, owner_id))
+        
+        if cur.rowcount > 0:
+            conn.commit()
+            flash("Notice deleted successfully!", "success")
+        else:
+            flash("Notice not found or permission denied.", "error")
+    except Exception as e:
+        conn.rollback()
+        print(f"Error deleting notice: {e}")
+        flash("Failed to delete notice", "error")
+    finally:
+        cur.close()
+        conn.close()
+        
+    return redirect(url_for('main.owner_notices'))
