@@ -11,6 +11,7 @@ DB_CONFIG = {
     "password": os.getenv("DB_PASSWORD"),
     "host": os.getenv("DB_HOST", "localhost"),
     "port": int(os.getenv("DB_PORT", "5432")),
+    "sslmode": "require" if os.getenv("DB_HOST") != "localhost" else "prefer"
 }
 
 from psycopg2 import pool
@@ -66,8 +67,10 @@ def get_db_connection():
         return psycopg2.connect(**DB_CONFIG)
         
     except OperationalError as e:
-        print(f"DB connection error: {e}")
+        print(f"❌ DB CONNECTION ERROR: {e}")
         return None
     except Exception as e:
-        print(f"General DB Error: {e}")
+        print(f"❌ GENERAL DB ERROR: {e}")
+        import traceback
+        traceback.print_exc()
         return None
