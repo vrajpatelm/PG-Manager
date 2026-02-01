@@ -2,7 +2,7 @@ import sys
 import os
 
 # Add the project root to sys.path so we can import 'app'
-# Netlify puts the function in a specific folder, so we might need to go up
+# We are in /netlify/functions/api.py, so root is two levels up
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')))
 
 import aws_wsgi
@@ -13,7 +13,6 @@ app = create_app()
 
 def handler(event, context):
     """
-    Netlify Function Handler using aws-wsgi to bridge Flask
+    Netlify Function Handler
     """
-    # Important: Netlify might pass 'isBase64Encoded' which aws-wsgi handles
     return aws_wsgi.response(app, event, context)

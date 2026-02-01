@@ -1,6 +1,5 @@
 [build]
   command = "pip install -r requirements.txt && npm run build:css"
-  functions = "functions"
   publish = "app/static"
 
 [functions]
