@@ -133,21 +133,34 @@ def login():
 @bp.route('/signup', methods=['GET', 'POST'])
 def signup():
     if request.method == 'POST':
-        name = request.form.get('name')
-        email = request.form.get('email')
-        password = request.form.get('password')
-        role = request.form.get('role') # 'OWNER' or 'TENANT'
-        otp_input = request.form.get('otp')
+        # Support both JSON (API) and Form Data (Classic)
+        if request.is_json:
+            data = request.get_json()
+            name = data.get('name')
+            email = data.get('email')
+            password = data.get('password')
+            role = data.get('role')
+            otp_input = data.get('otp')
+        else:
+            name = request.form.get('name')
+            email = request.form.get('email')
+            password = request.form.get('password')
+            role = request.form.get('role')
+            otp_input = request.form.get('otp')
 
         if not otp_input:
-            flash("OTP is required to verify email.", "error")
+            msg = "OTP is required to verify email."
+            if request.is_json: return jsonify({'success': False, 'message': msg}), 400
+            flash(msg, "error")
             return redirect(url_for('main.signup'))
         
         hashed_pw = generate_password_hash(password)
         
         conn = get_db_connection()
         if not conn:
-            flash("Database Error", "error")
+            msg = "Database Error"
+            if request.is_json: return jsonify({'success': False, 'message': msg}), 500
+            flash(msg, "error")
             return redirect(url_for('main.signup'))
             
         cur = conn.cursor()
@@ -157,24 +170,34 @@ def signup():
             otp_record = cur.fetchone()
             
             if not otp_record:
-                flash("OTP not found. Please request a new one.", "error")
+                msg = "OTP not found. Please request a new one."
+                if request.is_json: return jsonify({'success': False, 'message': msg}), 400
+                flash(msg, "error")
                 return redirect(url_for('main.signup'))
             
             stored_otp, expires = otp_record
             if stored_otp != otp_input:
-                flash("Invalid OTP. Please try again.", "error")
+                msg = "Invalid OTP. Please try again."
+                if request.is_json: return jsonify({'success': False, 'message': msg}), 400
+                flash(msg, "error")
                 return redirect(url_for('main.signup'))
             
             if datetime.now() > expires:
-                flash("OTP has expired. Please request a new one.", "error")
+                msg = "OTP has expired. Please request a new one."
+                if request.is_json: return jsonify({'success': False, 'message': msg}), 400
+                flash(msg, "error")
                 return redirect(url_for('main.signup'))
 
             # 2. Proceed with Signup
              # Check if email already taken (double check)
             cur.execute("SELECT id FROM users WHERE email = %s", (email,))
             if cur.fetchone():
-                flash("Email already registered. Please Login.", "error")
+                msg = "Email already registered. Please Login."
+                if request.is_json: return jsonify({'success': False, 'message': msg}), 400
+                flash(msg, "error")
                 return redirect(url_for('main.signup'))
+
+            redirect_target = url_for('main.login') # Default
 
             if role == 'OWNER':
                 # ... (Owner creation logic) ...
@@ -193,7 +216,7 @@ def signup():
                 session['user_id'] = user_id
                 session['role'] = 'OWNER'
                 session['name'] = name
-                return redirect(url_for('main.owner_dashboard'))
+                redirect_target = url_for('main.owner_dashboard')
 
             elif role == 'TENANT':
                 # 1. Verify Invitation
@@ -201,15 +224,18 @@ def signup():
                 tenant_record = cur.fetchone()
                 
                 if not tenant_record:
-                    # Specific Error as requested
-                    flash("You are not associated with any PG. Please verify your email or contact your PG Owner.", "error")
+                    msg = "You are not associated with any PG. Please verify your email or contact your PG Owner."
+                    if request.is_json: return jsonify({'success': False, 'message': msg}), 400
+                    flash(msg, "error")
                     return redirect(url_for('main.signup'))
                     
                 tenant_id = tenant_record[0]
                 status = tenant_record[2]
                 
                 if status == 'DRAFT':
-                    flash("Your admission is still in Draft. Please ask your Owner to finalize it.", "error")
+                    msg = "Your admission is still in Draft. Please ask your Owner to finalize it."
+                    if request.is_json: return jsonify({'success': False, 'message': msg}), 400
+                    flash(msg, "error")
                     return redirect(url_for('main.signup'))
                 
                 # ... (Tenant creation logic) ...
@@ -228,12 +254,18 @@ def signup():
                 session['user_id'] = user_id
                 session['role'] = 'TENANT'
                 session['name'] = tenant_record[3] # Use tenant name from record
-                return redirect(url_for('main.tenant_dashboard'))
+                redirect_target = url_for('main.tenant_dashboard')
+            
+            if request.is_json:
+                return jsonify({'success': True, 'redirect_url': redirect_target})
+            return redirect(redirect_target)
 
         except Exception as e:
             conn.rollback()
             print(f"Signup Error: {e}")
-            flash("Registration failed. Please try again.", "error")
+            msg = "Registration failed. Please try again."
+            if request.is_json: return jsonify({'success': False, 'message': msg}), 500
+            flash(msg, "error")
         finally:
             cur.close()
             conn.close()

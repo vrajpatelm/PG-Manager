@@ -174,7 +174,7 @@
                    <button type="button" onclick="location.reload()" class="px-4 py-3 rounded-xl bg-gray-100 text-slate-500 font-bold text-xs hover:bg-gray-200 transition-colors">
                        Back
                    </button>
-                   <button type="submit" 
+                   <button type="button" id="verify-btn" onclick="submitSignup()"
                           class="flex-1 py-3 rounded-xl btn-primary font-bold text-white text-sm shadow-lg shadow-brand1/20 hover:shadow-brand1/30 hover:-translate-y-0.5 transition-all duration-200">
                     Verify & Create Account
                   </button>
@@ -268,6 +268,63 @@
         }
     }
 
+    // Signup Logic
+    async function submitSignup() {
+        const name = document.getElementById('name').value;
+        const email = document.getElementById('email').value;
+        const password = document.getElementById('password').value;
+        const role = document.getElementById('role-input').value;
+        const otp = document.getElementById('otp').value;
+        const btn = document.getElementById('verify-btn');
+        const errorDiv = document.getElementById('otp-error');
+        
+        if (!otp) {
+            errorDiv.innerText = "Please enter the OTP.";
+            errorDiv.classList.remove('hidden');
+            return;
+        }
+
+        // Loading
+        btn.disabled = true;
+        btn.innerHTML = 'Verifying...';
+        
+        try {
+            const response = await fetch('/signup', {
+                method: 'POST',
+                headers: { 
+                    'Content-Type': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                body: JSON.stringify({ 
+                    name: name, 
+                    email: email, 
+                    password: password, 
+                    role: role,
+                    otp: otp 
+                })
+            });
+            
+            const data = await response.json();
+            
+            if (data.success) {
+                // Success - Redirect
+                window.location.href = data.redirect_url;
+            } else {
+                // Failure - Show Error
+                errorDiv.innerText = data.message || "Verification failed.";
+                errorDiv.classList.remove('hidden');
+                btn.disabled = false;
+                btn.innerHTML = 'Verify & Create Account';
+            }
+        } catch (err) {
+            console.error(err);
+            errorDiv.innerText = "Server Error. Please try again.";
+            errorDiv.classList.remove('hidden');
+            btn.disabled = false;
+            btn.innerHTML = 'Verify & Create Account';
+        }
+    }
+
     document.addEventListener('DOMContentLoaded', function () {
       const pw = document.getElementById('password');
       const btn = document.getElementById('toggle-password');
@@ -283,6 +340,11 @@
             }
           });
       }
+      
+      // Clear error on typing
+      document.getElementById('otp').addEventListener('input', function() {
+          document.getElementById('otp-error').classList.add('hidden');
+      });
     });
   </script>
 </body>
