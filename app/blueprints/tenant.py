@@ -66,11 +66,34 @@ def tenant_dashboard():
             'owner_id': owner_details[1] if owner_details else None
         }
 
-        return render_template('tenant/dashboard.html', tenant=tenant_data)
+        # Fetch Recent Notices
+        owner_id = owner_details[1] if owner_details else None
+        recent_notices = []
+        
+        if owner_id:
+             cur.execute("""
+                SELECT id, title, description, priority, created_at 
+                FROM notices 
+                WHERE owner_id = %s 
+                ORDER BY created_at DESC 
+                LIMIT 3
+            """, (owner_id,))
+             for row in cur.fetchall():
+                 recent_notices.append({
+                    'id': row[0],
+                    'title': row[1],
+                    'description': row[2],
+                    'priority': row[3],
+                    'created_at': row[4]
+                })
+
+        return render_template('tenant/dashboard.html', tenant=tenant_data, recent_notices=recent_notices)
     except Exception as e:
+        print(f"Tenant Dashboard Error: {e}")
         return render_template('tenant/dashboard.html',
                          tenant=tenant_data,
-                         current_date=datetime.now())
+                         current_date=datetime.now(),
+                         recent_notices=[])
     finally:
         cur.close()
         conn.close()
@@ -320,6 +343,43 @@ def tenant_payments():
     except Exception as e:
         print(f"Error fetching payments: {e}")
         return redirect(url_for('main.tenant_dashboard'))
+    finally:
+        cur.close()
+        conn.close()
+
+@bp.route('/tenant/notices')
+@role_required('TENANT')
+def tenant_notices():
+    conn = get_db_connection()
+    cur = conn.cursor()
+    try:
+        cur.execute("SELECT owner_id FROM tenants WHERE user_id = %s", (session.get('user_id'),))
+        tenant_row = cur.fetchone()
+        
+        notices = []
+        if tenant_row:
+             owner_id = tenant_row[0]
+             cur.execute("""
+                SELECT id, title, description, priority, created_at 
+                FROM notices 
+                WHERE owner_id = %s 
+                ORDER BY created_at DESC
+            """, (owner_id,))
+             
+             for row in cur.fetchall():
+                notices.append({
+                    'id': row[0],
+                    'title': row[1],
+                    'description': row[2],
+                    'priority': row[3],
+                    'created_at': row[4]
+                })
+        
+        return render_template('tenant/notices.html', notices=notices)
+        
+    except Exception as e:
+        print(f"Error fetching tenant notices: {e}")
+        return render_template('tenant/notices.html', notices=[])
     finally:
         cur.close()
         conn.close()

@@ -185,6 +185,23 @@ def owner_dashboard():
         high_priority_count = cur.fetchone()[0] or 0
 
         cur.execute("""
+            SELECT id, title, description, priority, created_at 
+            FROM notices 
+            WHERE owner_id = %s 
+            ORDER BY created_at DESC 
+            LIMIT 3
+        """, (owner_id,))
+        recent_notices = []
+        for row in cur.fetchall():
+            recent_notices.append({
+                'id': row[0],
+                'title': row[1],
+                'description': row[2],
+                'priority': row[3],
+                'created_at': row[4]
+            })
+
+        cur.execute("""
             SELECT type, title, description, created_at, metadata FROM (
                 SELECT 'PAYMENT' as type, 
                        'Rent Received' as title, 
@@ -214,11 +231,29 @@ def owner_dashboard():
                        'red' as metadata
                 FROM complaints 
                 WHERE owner_id = %s
+                
+                UNION ALL
+                
+                SELECT 'NOTICE' as type,
+                       'Notice Posted' as title,
+                       title as description,
+                       created_at,
+                       'purple' as metadata
+                FROM notices
+                WHERE owner_id = %s
             ) as activity
             ORDER BY created_at DESC
             LIMIT 5
-        """, (owner_id, owner_id, owner_id))
-        recent_activity = cur.fetchall()
+        """, (owner_id, owner_id, owner_id, owner_id))
+        recent_activity = []
+        for row in cur.fetchall():
+            recent_activity.append({
+                'type': row[0],
+                'title': row[1],
+                'description': row[2],
+                'created_at': row[3],
+                'metadata': row[4]
+            })
         
         return render_template('owner/dashboard.html', 
                              name=session.get('name', 'Owner'),
@@ -240,6 +275,7 @@ def owner_dashboard():
                              pending_approvals=pending_approvals,
                              total_pending_count=total_pending_count,
                              high_priority_count=high_priority_count,
+                             recent_notices=recent_notices,
                              recent_activity=recent_activity)
                              
     except Exception as e:
@@ -264,6 +300,7 @@ def owner_dashboard():
                              pending_complaints=[],
                              pending_approvals=[],
                              high_priority_count=0,
+                             recent_notices=[],
                              recent_activity=[])
     finally:
         cur.close()
@@ -1245,3 +1282,106 @@ def resolve_complaint(complaint_id):
         conn.close()
         
     return redirect(url_for('main.owner_complaints', status='PENDING'))
+
+@bp.route('/owner/notices')
+@role_required('OWNER')
+def owner_notices():
+    conn = get_db_connection()
+    cur = conn.cursor()
+    notices = []
+    try:
+        cur.execute("SELECT id FROM owners WHERE user_id = %s", (session.get('user_id'),))
+        row = cur.fetchone()
+        if not row:
+            return render_template('owner/notices.html', notices=[])
+        
+        owner_id = row[0]
+        
+        cur.execute("""
+            SELECT id, title, description, priority, created_at 
+            FROM notices 
+            WHERE owner_id = %s 
+            ORDER BY created_at DESC
+        """, (owner_id,))
+        
+        for row in cur.fetchall():
+            notices.append({
+                'id': row[0],
+                'title': row[1],
+                'description': row[2],
+                'priority': row[3],
+                'created_at': row[4]
+            })
+            
+    except Exception as e:
+        print(f"Error fetching notices: {e}")
+        notices = []
+    finally:
+        cur.close()
+        conn.close()
+        
+    return render_template('owner/notices.html', notices=notices)
+
+    return redirect(url_for('main.owner_notices'))
+
+@bp.route('/owner/notices/add', methods=['POST'])
+@role_required('OWNER')
+def add_notice():
+    title = request.form.get('title')
+    description = request.form.get('description')
+    priority = request.form.get('priority')
+    
+    conn = get_db_connection()
+    cur = conn.cursor()
+    try:
+        cur.execute("SELECT id FROM owners WHERE user_id = %s", (session.get('user_id'),))
+        row = cur.fetchone()
+        if not row:
+            flash("Owner profile not found", "error")
+            return redirect(url_for('main.owner_notices'))
+            
+        owner_id = row[0]
+        
+        cur.execute("""
+            INSERT INTO notices (owner_id, title, description, priority)
+            VALUES (%s, %s, %s, %s)
+        """, (owner_id, title, description, priority))
+        
+        conn.commit()
+        flash("Notice posted successfully!", "success")
+    except Exception as e:
+        conn.rollback()
+        print(f"Error posting notice: {e}")
+        flash("Failed to post notice", "error")
+    finally:
+        cur.close()
+        conn.close()
+        
+    return redirect(url_for('main.owner_notices'))
+
+@bp.route('/owner/notices/delete/<notice_id>', methods=['POST'])
+@role_required('OWNER')
+def delete_notice(notice_id):
+    conn = get_db_connection()
+    cur = conn.cursor()
+    try:
+        # Check if the notice belongs to the owner
+        cur.execute("SELECT id FROM owners WHERE user_id = %s", (session.get('user_id'),))
+        owner_id = cur.fetchone()[0]
+        
+        cur.execute("DELETE FROM notices WHERE id = %s AND owner_id = %s", (notice_id, owner_id))
+        
+        if cur.rowcount > 0:
+            conn.commit()
+            flash("Notice deleted successfully!", "success")
+        else:
+            flash("Notice not found or permission denied.", "error")
+    except Exception as e:
+        conn.rollback()
+        print(f"Error deleting notice: {e}")
+        flash("Failed to delete notice", "error")
+    finally:
+        cur.close()
+        conn.close()
+        
+    return redirect(url_for('main.owner_notices'))
