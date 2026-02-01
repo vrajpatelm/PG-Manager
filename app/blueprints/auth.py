@@ -93,7 +93,7 @@ def send_otp_email(to_email, otp):
 def send_otp():
     """API endpoint to generate and send OTP"""
     data = request.get_json()
-    email = data.get('email')
+    email = data.get('email', '').strip().lower()
     
     if not email:
         return jsonify({'success': False, 'message': 'Email is required'}), 400
@@ -134,19 +134,24 @@ def send_otp():
 @bp.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
-        email = request.form.get('email')
+        email = request.form.get('email', '').strip().lower()
         password = request.form.get('password')
+        
+        print(f"DEBUG LOGIN: Email='{email}', Password len={len(password) if password else 0}")
         
         conn = get_db_connection()
         if not conn:
+            print("DEBUG LOGIN: DB Connection FAILED")
             flash('Database connection error', 'error')
             return render_template('login.html')
             
         cur = conn.cursor()
+        print(f"DEBUG LOGIN: Connected to DB. Checking user...")
         try:
             # Check User
             cur.execute("SELECT id, password_hash, role FROM users WHERE email = %s", (email,))
             user = cur.fetchone()
+            print(f"DEBUG LOGIN: User Found: {user}")
             
             if not user:
                 flash('User does not exist. Please Sign Up first.', 'error')
@@ -190,13 +195,13 @@ def signup():
         if request.is_json:
             data = request.get_json()
             name = data.get('name')
-            email = data.get('email')
+            email = data.get('email', '').strip().lower()
             password = data.get('password')
             role = data.get('role')
             otp_input = data.get('otp')
         else:
             name = request.form.get('name')
-            email = request.form.get('email')
+            email = request.form.get('email', '').strip().lower()
             password = request.form.get('password')
             role = request.form.get('role')
             otp_input = request.form.get('otp')
