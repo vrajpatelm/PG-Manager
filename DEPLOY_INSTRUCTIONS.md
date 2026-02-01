@@ -40,21 +40,4 @@ The cloud database is empty. You need to create the tables there.
 *   **500 Error?**: Check "Logs" in Vercel. Usually means DB connection failed.
 *   **Static Files**: Vercel handles `static/` folder automatically.
 
----
 
-# 🌍 Option 2: Deploy to Netlify
-
-I have also configured the app for Netlify!
-
-1.  Push your code to **GitHub**.
-2.  Go to **Netlify.com** -> "Add new site" -> "Import from Git".
-3.  **Build Settings**:
-    *   **Build command**: `npm run build:css`
-    *   **Publish directory**: `app/static`
-    *   **Functions directory**: `netlify/functions` (Should be auto-detected from netlify.toml)
-4.  **Environment Variables**:
-    *   Click **"Advanced"** or go to "Site Settings" -> "Environment Variables".
-    *   Add the **Exact Same Variables** as above (`DB_HOST`, `DB_USER`, `MAIL_PASSWORD`, etc.).
-5.  **Deploy Site**.
-
-Netlify will use the `netlify/functions/api.py` file to run your Flask app as a Serverless Function.
