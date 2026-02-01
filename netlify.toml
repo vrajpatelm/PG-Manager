@@ -3,6 +3,9 @@
   functions = "netlify/functions"
   publish = "app/static"
 
+[functions]
+  included_files = ["app/**", "requirements.txt", ".env"]
+
 [[redirects]]
   from = "/static/*"
   to = "/static/:splat"
