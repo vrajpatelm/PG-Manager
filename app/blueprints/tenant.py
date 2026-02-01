@@ -6,12 +6,10 @@ from flask import render_template, request, redirect, url_for, session, flash, s
 from werkzeug.security import generate_password_hash
 from app.database.database import get_db_connection
 from . import bp
-from app.utils.decorators import login_required, role_required
 
 @bp.route('/tenant/dashboard')
-@login_required
-@role_required('TENANT')
 def tenant_dashboard():
+    if session.get('role') != 'TENANT': return redirect(url_for('main.login'))
     
     conn = get_db_connection()
     cur = conn.cursor()
@@ -77,9 +75,8 @@ def tenant_dashboard():
         conn.close()
 
 @bp.route('/tenant/pay', methods=['POST'])
-@login_required
-@role_required('TENANT')
 def tenant_pay_rent():
+    if session.get('role') != 'TENANT': return redirect(url_for('main.login'))
 
     amount = request.form['amount']
     txn_id = request.form['transaction_id']
@@ -117,9 +114,8 @@ def tenant_pay_rent():
     return redirect(url_for('main.tenant_dashboard'))
 
 @bp.route('/tenant/complaints')
-@login_required
-@role_required('TENANT')
 def tenant_complaints():
+    if session.get('role') != 'TENANT': return redirect(url_for('main.login'))
 
     user_id = session.get('user_id')
 
@@ -162,9 +158,8 @@ def tenant_complaints():
         return redirect(url_for('main.tenant_dashboard'))
 
 @bp.route('/tenant/complaint', methods=['POST'])
-@login_required
-@role_required('TENANT')
 def tenant_raise_complaint():
+    if session.get('role') != 'TENANT': return redirect(url_for('main.login'))
 
     title = request.form['title']
     description = request.form['description']
@@ -211,9 +206,8 @@ def tenant_qr_code(tenant_id):
     return send_file(buf, mimetype='image/png')
 
 @bp.route('/tenant/settings')
-@login_required
-@role_required('TENANT')
 def tenant_settings():
+    if session.get('role') != 'TENANT': return redirect(url_for('main.login'))
     
     user_id = session.get('user_id')
     
@@ -249,9 +243,8 @@ def tenant_settings():
         conn.close()
 
 @bp.route('/tenant/settings/update', methods=['POST'])
-@login_required
-@role_required('TENANT')
 def tenant_update_settings():
+    if session.get('role') != 'TENANT': return redirect(url_for('main.login'))
     
     phone = request.form.get('phone')
     password = request.form.get('password')
@@ -286,9 +279,8 @@ def tenant_profile():
     return redirect(url_for('main.tenant_settings'))
 
 @bp.route('/tenant/payments')
-@login_required
-@role_required('TENANT')
 def tenant_payments():
+    if session.get('role') != 'TENANT': return redirect(url_for('main.login'))
     
     user_id = session.get('user_id')
     

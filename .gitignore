@@ -36,7 +36,7 @@ yarn-error.log*
 
 # Tailwind / compiled CSS
 # Ignore compiled CSS (generated from Tailwind CLI)
-# app/static/css/tailwind.css
+app/static/css/tailwind.css
 
 # ===============================
 # Python
