@@ -4,15 +4,17 @@
 ### ✅ OTP Verification for Signup
 - **Goal**: Verify email ownership before creating accounts.
 - **Flow**: User enters details -> System sends OTP to email -> User enters OTP -> Account Created.
-- **Status**: *In Progress*
+- **Status**: *Completed*
 
-### 🔒 Password Reset Flow
+### ✅ Password Reset Flow
 - **Goal**: Allow users to recover lost passwords via email.
 - **Implementation**: "Forgot Password" link -> Email with unique link/token -> New Password form.
+- **Status**: *Completed*
 
-### 🛡️ Security Decorators
+### ✅ Security Decorators
 - **Goal**: Centralize role-based access control.
-- **Implementation**: Create decorators like `@login_required` and `@role_required('OWNER')` to replace repetitive checks in every route.
+- **Implementation**: Created `@login_required` and `@role_required(role)` decorators in `app/utils/decorators.py` and refactored all Owner/Tenant routes to use them.
+- **Status**: *Completed*
 
 ## 2. Communication Features
 ### 📢 Digital Notice Board

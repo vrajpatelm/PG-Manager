@@ -4,11 +4,12 @@ import psycopg2
 from datetime import datetime, timedelta, timezone, date as d
 from flask import render_template, request, redirect, url_for, session, flash, Response, send_file
 from app.database.database import get_db_connection
+from app.utils.decorators import role_required
 from . import bp
 
 @bp.route('/owner/dashboard')
+@role_required('OWNER')
 def owner_dashboard():
-    if session.get('role') != 'OWNER': return redirect(url_for('main.login'))
     
     conn = get_db_connection()
     if not conn: 
@@ -269,8 +270,8 @@ def owner_dashboard():
         conn.close()
 
 @bp.route('/owner/payment/approve/<payment_id>', methods=['POST'])
+@role_required('OWNER')
 def approve_payment(payment_id):
-    if session.get('role') != 'OWNER': return redirect(url_for('main.login'))
     
     conn = get_db_connection()
     cur = conn.cursor()
@@ -287,8 +288,8 @@ def approve_payment(payment_id):
     return redirect(url_for('main.owner_dashboard'))
 
 @bp.route('/owner/payment/reject/<payment_id>', methods=['POST'])
+@role_required('OWNER')
 def reject_payment(payment_id):
-    if session.get('role') != 'OWNER': return redirect(url_for('main.login'))
     
     conn = get_db_connection()
     cur = conn.cursor()
@@ -306,8 +307,8 @@ def reject_payment(payment_id):
 
 
 @bp.route('/owner/tenants')
+@role_required('OWNER')
 def owner_tenants():
-    if session.get('role') != 'OWNER': return redirect(url_for('main.login'))
     
     conn = get_db_connection()
     if not conn:
@@ -435,8 +436,8 @@ def owner_tenants():
         conn.close()
 
 @bp.route('/owner/add-tenant', methods=['GET', 'POST'])
+@role_required('OWNER')
 def owner_add_tenant():
-    if session.get('role') != 'OWNER': return redirect(url_for('main.login'))
     
     if request.method == 'POST':
         full_name = request.form.get('full_name')
@@ -571,8 +572,8 @@ def owner_add_tenant():
 
 
 @bp.route('/owner/settings')
+@role_required('OWNER')
 def owner_settings():
-    if session.get('role') != 'OWNER': return redirect(url_for('main.login'))
     
     conn = get_db_connection()
     cur = conn.cursor()
@@ -639,8 +640,8 @@ def owner_settings():
         conn.close()
 
 @bp.route('/owner/settings/update', methods=['POST'])
+@role_required('OWNER')
 def owner_settings_update():
-    if session.get('role') != 'OWNER': return redirect(url_for('main.login'))
     
     def clean(val):
         return val if val and val.strip() != "" else None
@@ -746,8 +747,8 @@ def owner_settings_update():
 
 
 @bp.route('/owner/export/tenants')
+@role_required('OWNER')
 def export_tenants():
-    if session.get('role') != 'OWNER': return redirect(url_for('main.login'))
     
     import csv
     
@@ -817,8 +818,8 @@ def owner_qr_image(owner_id):
         conn.close()
 
 @bp.route('/owner/tenants/update-status', methods=['POST'])
+@role_required('OWNER')
 def update_tenant_status():
-    if session.get('role') != 'OWNER': return redirect(url_for('main.login'))
     
     tenant_id = request.form.get('tenant_id')
     new_status = request.form.get('status')
@@ -844,13 +845,13 @@ def update_tenant_status():
     return redirect(url_for('main.owner_tenants'))
 
 @bp.route('/owner/tenants/<int:tenant_id>')
+@role_required('OWNER')
 def owner_tenant_details(tenant_id):
-    if session.get('role') != 'OWNER': return redirect(url_for('main.login'))
     return render_template('owner/tenant_details.html', tenant_id=tenant_id)
 
 @bp.route('/owner/properties')
+@role_required('OWNER')
 def owner_properties():
-    if session.get('role') != 'OWNER': return redirect(url_for('main.login'))
     
     conn = get_db_connection()
     if not conn:
@@ -913,8 +914,8 @@ def owner_properties():
         conn.close()
 
 @bp.route('/owner/properties/add-room', methods=['POST'])
+@role_required('OWNER')
 def add_room():
-    if session.get('role') != 'OWNER': return redirect(url_for('main.login'))
     
     room_number = request.form.get('room_number')
     floor = request.form.get('floor')
@@ -958,8 +959,8 @@ def add_room():
 
 
 @bp.route('/owner/properties/edit-room', methods=['POST'])
+@role_required('OWNER')
 def edit_room():
-    if session.get('role') != 'OWNER': return redirect(url_for('main.login'))
     
     room_id = request.form.get('room_id')
     room_number = request.form.get('room_number')
@@ -1004,8 +1005,8 @@ def edit_room():
     return redirect(url_for('main.owner_properties'))
 
 @bp.route('/owner/finance')
+@role_required('OWNER')
 def owner_finance():
-    if session.get('role') != 'OWNER': return redirect(url_for('main.login'))
     
     conn = get_db_connection()
     cur = conn.cursor()
@@ -1107,8 +1108,8 @@ def owner_finance():
         return render_template('owner/finance.html', tenants=[], expenses=[], current_month_name=current_month_name)
 
 @bp.route('/owner/record-payment', methods=['POST'])
+@role_required('OWNER')
 def owner_record_payment():
-    if session.get('role') != 'OWNER': return redirect(url_for('main.login'))
     
     tenant_id = request.form.get('tenant_id')
     amount = request.form.get('amount')
@@ -1139,8 +1140,8 @@ def owner_record_payment():
     return redirect(url_for('main.owner_finance'))
 
 @bp.route('/owner/add-expense', methods=['POST'])
+@role_required('OWNER')
 def owner_add_expense():
-    if session.get('role') != 'OWNER': return redirect(url_for('main.login'))
     
     category = request.form.get('category')
     amount = request.form.get('amount')
@@ -1174,8 +1175,8 @@ def owner_add_expense():
     return redirect(url_for('main.owner_finance'))
 
 @bp.route('/owner/complaints')
+@role_required('OWNER')
 def owner_complaints():
-    if session.get('role') != 'OWNER': return redirect(url_for('main.login'))
     
     status_filter = request.args.get('status', 'PENDING')
     
@@ -1226,8 +1227,8 @@ def owner_complaints():
         return render_template('owner/complaints.html', complaints=[], status_filter=status_filter)
 
 @bp.route('/owner/complaints/resolve/<uuid:complaint_id>', methods=['POST'])
+@role_required('OWNER')
 def resolve_complaint(complaint_id):
-    if session.get('role') != 'OWNER': return redirect(url_for('main.login'))
     
     conn = get_db_connection()
     cur = conn.cursor()
