@@ -402,7 +402,9 @@
                        </div>
                    </div>
                    <div class="flex gap-2">
-                       <button class="flex-1 py-2 text-xs font-bold text-brand1 bg-brand1/10 rounded-lg hover:bg-brand1/20 transition-colors">Remind All</button>
+                       <form action="{{ url_for('main.remind_all_tenants') }}" method="POST" class="w-full" onsubmit="return confirm('Send rent reminders to ALL tenants with pending dues?');">
+                            <button type="submit" class="cursor-pointer w-full py-2 text-xs font-bold text-brand1 bg-brand1/10 rounded-lg hover:bg-brand1/20 transition-colors">Remind All</button>
+                       </form>
                    </div>
                </div>
 

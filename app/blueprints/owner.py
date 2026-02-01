@@ -1,5 +1,6 @@
 import json
 import io
+import threading
 import psycopg2
 from datetime import datetime, timedelta, timezone, date as d
 from flask import render_template, request, redirect, url_for, session, flash, Response, send_file, current_app
@@ -963,6 +964,99 @@ def remind_tenant(tenant_id):
         conn.close()
         
     return redirect(url_for('main.owner_tenants'))
+
+    return redirect(url_for('main.owner_tenants'))
+
+def process_bulk_reminders(app, user_id, dashboard_url):
+    """Background worker for sending bulk reminders"""
+    with app.app_context():
+        conn = get_db_connection()
+        cur = conn.cursor()
+        try:
+            print(f"Starting bulk reminder process for User {user_id}")
+            current_month = datetime.now().strftime('%B %Y')
+            
+            # 1. Get Owner & Property Info
+            cur.execute("""
+                SELECT o.id, o.full_name, p.name 
+                FROM owners o
+                JOIN properties p ON o.id = p.owner_id
+                WHERE o.user_id = %s
+                LIMIT 1
+            """, (user_id,))
+            owner_data = cur.fetchone()
+            
+            if not owner_data:
+                print("Owner not found in background task")
+                return
+                
+            owner_id, owner_name, property_name = owner_data
+            
+            # 2. Get active tenants
+            cur.execute("""
+                SELECT t.id, t.full_name, t.email, t.room_number, t.monthly_rent
+                FROM tenants t
+                WHERE t.owner_id = %s AND t.onboarding_status = 'ACTIVE'
+            """, (owner_id,))
+            
+            tenants = cur.fetchall()
+            
+            count = 0
+            for t in tenants:
+                t_id, t_name, t_email, t_room, t_rent = t
+                
+                # Check payment status
+                cur.execute("""
+                    SELECT id FROM payments 
+                    WHERE tenant_id = %s 
+                    AND EXTRACT(MONTH FROM payment_date) = EXTRACT(MONTH FROM CURRENT_DATE)
+                    AND EXTRACT(YEAR FROM payment_date) = EXTRACT(YEAR FROM CURRENT_DATE)
+                    AND status = 'APPROVED'
+                """, (t_id,))
+                
+                if cur.fetchone():
+                    continue 
+                    
+                if t_email:
+                    try:
+                        send_email(
+                            to_email=t_email,
+                            subject=f"Rent Reminder - {property_name}",
+                            template="emails/rent_reminder.html",
+                            tenant_name=t_name,
+                            rent_amount=t_rent,
+                            room_number=t_room,
+                            payment_month=current_month,
+                            owner_name=owner_name,
+                            dashboard_url=dashboard_url
+                        )
+                        count += 1
+                    except Exception as email_err:
+                        print(f"Failed to send to {t_email}: {email_err}")
+            
+            print(f"Bulk Process Complete. Sent {count} emails.")
+
+        except Exception as e:
+            print(f"Bulk Reminder Background Error: {e}")
+        finally:
+            cur.close()
+            conn.close()
+
+@bp.route('/owner/tenants/remind-all', methods=['POST'])
+@role_required('OWNER')
+def remind_all_tenants():
+    # Capture legitimate app object and context data
+    app = current_app._get_current_object()
+    user_id = session.get('user_id')
+    dashboard_url = url_for('main.tenant_dashboard', _external=True)
+    
+    # Spawn background thread
+    thread = threading.Thread(target=process_bulk_reminders, args=(app, user_id, dashboard_url))
+    thread.daemon = True
+    thread.start()
+    
+    flash("Background process started! Emails are being sent.", "success")
+    return redirect(request.referrer or url_for('main.owner_dashboard'))
 
 @bp.route('/owner/tenants/<tenant_id>')
 @role_required('OWNER')

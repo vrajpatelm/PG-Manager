@@ -63,12 +63,12 @@
                                       <form action="{{ url_for('main.update_tenant_status') }}" method="POST" class="inline">
                                           <input type="hidden" name="tenant_id" value="{{ tenant.id }}">
                                           <input type="hidden" name="status" value="PENDING">
-                                          <button type="submit" class="text-xs font-bold text-white bg-green-500 hover:bg-green-600 px-3 py-1.5 rounded-lg shadow-sm transition-colors" title="Finalize Admission"> Admit </button>
+                                          <button type="submit" class="cursor-pointer text-xs font-bold text-white bg-green-500 hover:bg-green-600 px-3 py-1.5 rounded-lg shadow-sm transition-colors" title="Finalize Admission"> Admit </button>
                                       </form>
                                       <form action="{{ url_for('main.update_tenant_status') }}" method="POST" class="inline" onsubmit="return confirm('Are you sure you want to reject this draft?');">
                                           <input type="hidden" name="tenant_id" value="{{ tenant.id }}">
                                           <input type="hidden" name="status" value="REJECTED">
-                                          <button type="submit" class="text-xs font-bold text-red-600 bg-red-50 hover:bg-red-100 border border-red-200 px-3 py-1.5 rounded-lg transition-colors" title="Reject Draft"> Reject </button>
+                                          <button type="submit" class="cursor-pointer text-xs font-bold text-red-600 bg-red-50 hover:bg-red-100 border border-red-200 px-3 py-1.5 rounded-lg transition-colors" title="Reject Draft"> Reject </button>
                                       </form>
                                   </div>
                                   {% endif %}
@@ -77,7 +77,7 @@
                                   <!-- Email Reminder -->
                                   <form action="{{ url_for('main.remind_tenant', tenant_id=tenant.id) }}" method="POST" class="inline">
                                       <input type="hidden" name="method" value="email">
-                                      <button type="submit" class="p-2 text-slate-400 hover:text-blue-500 transition-colors" title="Send Email Reminder">
+                                      <button type="submit" class="cursor-pointer p-2 text-slate-400 hover:text-blue-500 transition-colors" title="Send Email Reminder">
                                           <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>
                                       </button>
                                   </form>
