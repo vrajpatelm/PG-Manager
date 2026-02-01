@@ -451,6 +451,14 @@ def owner_add_tenant():
             flash("Name and Email are required", "error")
             return redirect(url_for('main.owner_add_tenant'))
             
+        if not phone:
+             flash("Phone Number is required", "error")
+             return redirect(url_for('main.owner_add_tenant'))
+             
+        if not phone.isdigit() or len(phone) != 10:
+             flash("Phone number must contain exactly 10 digits", "error")
+             return redirect(url_for('main.owner_add_tenant'))
+
         if not rent:
             flash("Monthly Rent is mandatory", "error")
             return redirect(url_for('main.owner_add_tenant'))
