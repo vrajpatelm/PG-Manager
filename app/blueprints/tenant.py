@@ -87,13 +87,35 @@ def tenant_dashboard():
                     'created_at': row[4]
                 })
 
-        return render_template('tenant/dashboard.html', tenant=tenant_data, recent_notices=recent_notices)
+        # Fetch Property Settings (WiFi, Rules, Timings)
+        property_settings = None
+        if owner_id:
+             cur.execute("""
+                SELECT wifi_ssid, wifi_password, gate_closing_time, house_rules, 
+                       breakfast_start_time, breakfast_end_time
+                FROM properties 
+                WHERE owner_id = %s
+                LIMIT 1
+            """, (owner_id,))
+             p_row = cur.fetchone()
+             if p_row:
+                 property_settings = {
+                     'wifi_ssid': p_row[0],
+                     'wifi_password': p_row[1],
+                     'gate_time': p_row[2].strftime('%I:%M %p') if p_row[2] else None,
+                     'rules': p_row[3],
+                     'bf_start': p_row[4].strftime('%I:%M %p') if p_row[4] else None,
+                     'bf_end': p_row[5].strftime('%I:%M %p') if p_row[5] else None
+                 }
+
+        return render_template('tenant/dashboard.html', tenant=tenant_data, recent_notices=recent_notices, property=property_settings)
     except Exception as e:
         print(f"Tenant Dashboard Error: {e}")
         return render_template('tenant/dashboard.html',
                          tenant=tenant_data,
                          current_date=datetime.now(),
-                         recent_notices=[])
+                         recent_notices=[],
+                         property=None)
     finally:
         cur.close()
         conn.close()
