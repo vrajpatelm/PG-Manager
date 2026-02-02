@@ -17,19 +17,12 @@ def send_email(to_email, subject, template, attachments=None, **kwargs):
     try:
         html_content = render_template(template, current_year=datetime.now().year, **kwargs)
     except Exception as e:
-        print(f"Error rendering template {template}: {e}")
+        current_app.logger.error(f"Error rendering template {template}", exc_info=e)
         return False
 
     # Mock Mode if no credentials
     if not user or not pwd:
-        print(f"\n{'='*50}")
-        print(f"[MOCK EMAIL] To: {to_email}")
-        print(f"Subject: {subject}")
-        print(f"Template: {template}")
-        print(f"Context: {kwargs}")
-        if attachments:
-            print(f"Attachments: {[a['name'] for a in attachments]}")
-        print(f"{'='*50}\n")
+        current_app.logger.info(f"MOCK EMAIL to {to_email}", extra={'subject': subject, 'context': kwargs})
         return True
 
     try:
@@ -56,7 +49,9 @@ def send_email(to_email, subject, template, attachments=None, **kwargs):
             server.starttls()
             server.login(user, pwd)
             server.send_message(msg)
+        
+        current_app.logger.info(f"Email sent to {to_email}", extra={'subject': subject})
         return True
     except Exception as e:
-        print(f"Error sending email: {e}")
+        current_app.logger.error(f"Error sending email to {to_email}", exc_info=e)
         return False

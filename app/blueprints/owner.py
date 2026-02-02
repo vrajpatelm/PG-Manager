@@ -325,7 +325,6 @@ def approve_payment(payment_id):
                  amount=amount
              )
              
-             # 4. Notify Owner
              send_email(
                  to_email=session.get('email', 'dhruvharani8@gmail.com'), # Fallback if session missing
                  subject=f"💰 Payment Verified: ₹{amount}",
@@ -336,6 +335,12 @@ def approve_payment(payment_id):
                  month=month,
                  amount=amount,
                  mode=mode
+             )
+             
+             # Audit Log
+             current_app.logger.info(
+                 f"Payment {payment_id} Verified by Owner {owner_id}", 
+                 extra={'event': 'PAYMENT_VERIFIED', 'amount': amount, 'tenant': tenant_name, 'owner_id': owner_id}
              )
 
         conn.commit()

@@ -72,3 +72,14 @@ htmlcov/
 .DS_Store
 Thumbs.db
 
+
+# ===============================
+# Logs & Debugging
+# ===============================
+logs/
+*.log
+error_log.txt
+debug_output.txt
+email_update_log.txt
+verification_result.txt
+cookies.txt

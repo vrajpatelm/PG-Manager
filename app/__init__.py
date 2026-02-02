@@ -13,6 +13,52 @@ def create_app():
     from .blueprints import bp as main_bp
     app.register_blueprint(main_bp)
     
+    # 🆕 Enterprise Logging Setup
+    from .utils.logger import setup_logging
+    import uuid
+    from flask import request
+    
+    setup_logging(app)
+    
+    @app.before_request
+    def start_timer():
+        # 1. Start Timer for Latency Tracking
+        import time
+        from flask import g
+        g.start_time = time.time()
+        
+        # 2. Generate Trace ID
+        request.request_id = request.headers.get('X-Request-ID', str(uuid.uuid4()))
+        
+    @app.after_request
+    def log_response(response):
+        # 3. Calculate Duration
+        import time
+        from flask import g
+        duration = 0
+        if hasattr(g, 'start_time'):
+            duration = int((time.time() - g.start_time) * 1000) # milliseconds
+
+        # 4. Industry Standard: Log Traffic & Performance (Exclude static files)
+        if not request.path.startswith('/static'):
+            app.logger.info(
+                "HTTP Access",
+                extra={
+                    'status': response.status_code,
+                    'method': request.method,
+                    'path': request.path,
+                    'duration_ms': duration,
+                    'ip': request.remote_addr
+                }
+            )
+        return response
+        
+    @app.errorhandler(Exception)
+    def handle_exception(e):
+        # Log unhandled exceptions with full stack trace in JSON
+        app.logger.error("Unhandled Exception", exc_info=e)
+        return "Internal Server Error (Reference ID: {})".format(getattr(request, "request_id", "N/A")), 500
+    
     # Mail Config (Optimistic Gmail or Console)
     app.config['MAIL_SERVER'] = 'smtp.gmail.com'
     app.config['MAIL_PORT'] = 587

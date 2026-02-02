@@ -154,16 +154,29 @@ def login():
             print(f"DEBUG LOGIN: User Found: {user}")
             
             if not user:
+                current_app.logger.warning(
+                    f"Login Failed: Invalid Email {email}", 
+                    extra={'event': 'LOGIN_FAIL', 'reason': 'USER_NOT_FOUND', 'email': email}
+                )
                 flash('User does not exist. Please Sign Up first.', 'error')
                 return render_template('login.html')
             
             if not check_password_hash(user[1], password):
+                current_app.logger.warning(
+                    f"Login Failed: Invalid Password for {email}", 
+                    extra={'event': 'LOGIN_FAIL', 'reason': 'WRONG_PASSWORD', 'user_id': user[0]}
+                )
                 flash('Incorrect password. Please try again.', 'error')
                 return render_template('login.html')
 
             # Login Success
             session['user_id'] = user[0]
             session['role'] = user[2]
+            
+            current_app.logger.info(
+                f"User {user[0]} Logged In Successfully", 
+                extra={'event': 'LOGIN_SUCCESS', 'user_id': user[0], 'role': user[2]}
+            )
             
             # Get Name
             if user[2] == 'OWNER':
