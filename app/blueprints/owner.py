@@ -210,7 +210,7 @@ def owner_dashboard():
             FROM activity_logs 
             WHERE owner_id = %s 
             ORDER BY created_at DESC 
-            LIMIT 10
+            LIMIT 50
         """, (owner_id,))
         recent_activity = []
         for row in cur.fetchall():
