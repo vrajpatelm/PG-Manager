@@ -155,6 +155,14 @@
                 </div>
               </div>
 
+              <div class="space-y-1">
+                 <label for="confirm_password" class="text-xs font-bold text-slate-700 ml-1 uppercase tracking-wide">Confirm Password</label>
+                <div class="relative">
+                  <input id="confirm_password" name="confirm_password" type="password" placeholder="••••••••" required 
+                         class="w-full px-4 py-2.5 pr-20 bg-white/60 border border-gray-200 rounded-xl focus:outline-none focus:border-brand1 focus:ring-2 focus:ring-brand1/10 text-sm transition-all" />
+                </div>
+              </div>
+
                <button type="button" id="get-otp-btn" onclick="requestOtp()"
                       class="w-full py-3 mt-4 rounded-xl btn-primary font-bold text-white text-sm shadow-lg shadow-brand1/20 hover:shadow-brand1/30 hover:-translate-y-0.5 transition-all duration-200 flex items-center justify-center">
                 Get Verification Code
@@ -227,12 +235,19 @@
         const name = document.getElementById('name').value;
         const email = document.getElementById('email').value;
         const password = document.getElementById('password').value;
+        const confirmPassword = document.getElementById('confirm_password').value;
         const btn = document.getElementById('get-otp-btn');
         const errorDiv = document.getElementById('otp-error');
         
         // Basic Validation
-        if (!name || !email || !password) {
+        if (!name || !email || !password || !confirmPassword) {
             errorDiv.innerText = "Please fill all fields first.";
+            errorDiv.classList.remove('hidden');
+            return;
+        }
+
+        if (password !== confirmPassword) {
+            errorDiv.innerText = "Passwords do not match.";
             errorDiv.classList.remove('hidden');
             return;
         }
@@ -299,6 +314,7 @@
                     name: name, 
                     email: email, 
                     password: password, 
+                    confirm_password: document.getElementById('confirm_password').value,
                     role: role,
                     otp: otp 
                 })

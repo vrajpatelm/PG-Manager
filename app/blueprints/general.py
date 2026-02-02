@@ -4,6 +4,8 @@ import os
 from werkzeug.utils import secure_filename
 from app.database.database import get_db_connection
 
+
+
 @bp.route("/")
 def index():
     if 'user_id' in session:

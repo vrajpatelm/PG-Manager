@@ -1,0 +1,11 @@
+============================= test session starts =============================
+platform win32 -- Python 3.13.4, pytest-9.0.2, pluggy-1.6.0
+rootdir: P:\PG-Manager
+plugins: base-url-2.1.0, cov-7.0.0, playwright-0.7.2
+collected 10 items
+
+tests\e2e\test_owner_flows.py ..                                         [ 20%]
+tests\test_auth.py ...                                                   [ 50%]
+tests\test_owner_features.py .....                                       [100%]
+
+============================= 10 passed in 56.59s =============================

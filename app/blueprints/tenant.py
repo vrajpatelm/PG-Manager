@@ -6,6 +6,8 @@ from flask import render_template, request, redirect, url_for, session, flash, s
 from werkzeug.security import generate_password_hash
 from app.database.database import get_db_connection
 from app.utils.decorators import role_required
+from app.utils.pdf import generate_receipt
+import io
 from . import bp
 
 @bp.route('/tenant/dashboard')
@@ -87,13 +89,35 @@ def tenant_dashboard():
                     'created_at': row[4]
                 })
 
-        return render_template('tenant/dashboard.html', tenant=tenant_data, recent_notices=recent_notices)
+        # Fetch Property Settings (WiFi, Rules, Timings)
+        property_settings = None
+        if owner_id:
+             cur.execute("""
+                SELECT wifi_ssid, wifi_password, gate_closing_time, house_rules, 
+                       breakfast_start_time, breakfast_end_time
+                FROM properties 
+                WHERE owner_id = %s
+                LIMIT 1
+            """, (owner_id,))
+             p_row = cur.fetchone()
+             if p_row:
+                 property_settings = {
+                     'wifi_ssid': p_row[0],
+                     'wifi_password': p_row[1],
+                     'gate_time': p_row[2].strftime('%I:%M %p') if p_row[2] else None,
+                     'rules': p_row[3],
+                     'bf_start': p_row[4].strftime('%I:%M %p') if p_row[4] else None,
+                     'bf_end': p_row[5].strftime('%I:%M %p') if p_row[5] else None
+                 }
+
+        return render_template('tenant/dashboard.html', tenant=tenant_data, recent_notices=recent_notices, property=property_settings)
     except Exception as e:
         print(f"Tenant Dashboard Error: {e}")
         return render_template('tenant/dashboard.html',
                          tenant=tenant_data,
                          current_date=datetime.now(),
-                         recent_notices=[])
+                         recent_notices=[],
+                         property=None)
     finally:
         cur.close()
         conn.close()
@@ -320,7 +344,7 @@ def tenant_payments():
         tenant_id = tenant[0]
         
         cur.execute("""
-            SELECT amount, payment_date, payment_month, status, payment_mode, remarks, created_at
+            SELECT id, amount, payment_date, payment_month, status, payment_mode, remarks, created_at
             FROM payments 
             WHERE tenant_id = %s 
             ORDER BY payment_date DESC, created_at DESC
@@ -329,13 +353,14 @@ def tenant_payments():
         payments = []
         for row in cur.fetchall():
             payments.append({
-                'amount': row[0],
-                'date': row[1],
-                'month': row[2],
-                'status': row[3],
-                'mode': row[4],
-                'remarks': row[5],
-                'created_at': row[6]
+                'id': row[0],
+                'amount': row[1],
+                'date': row[2],
+                'month': row[3],
+                'status': row[4],
+                'mode': row[5],
+                'remarks': row[6],
+                'created_at': row[7]
             })
             
         return render_template('tenant/payments.html', payments=payments, session=session)
@@ -380,6 +405,60 @@ def tenant_notices():
     except Exception as e:
         print(f"Error fetching tenant notices: {e}")
         return render_template('tenant/notices.html', notices=[])
+    finally:
+        cur.close()
+        conn.close()
+
+@bp.route('/tenant/payment/<payment_id>/download')
+@role_required('TENANT')
+def download_receipt(payment_id):
+    conn = get_db_connection()
+    cur = conn.cursor()
+    try:
+        # Fetch payment details with joins for Tenant and Owner info
+        cur.execute("""
+            SELECT p.id, p.amount, p.payment_date, p.payment_month, p.payment_mode, p.status, 
+                   t.full_name, t.room_number, o.full_name
+            FROM payments p
+            JOIN tenants t ON p.tenant_id = t.id
+            JOIN owners o ON t.owner_id = o.id
+            WHERE p.id = %s AND t.user_id = %s
+        """, (payment_id, session.get('user_id')))
+        
+        row = cur.fetchone()
+        if not row:
+            flash("Receipt not found or access denied.", "error")
+            return redirect(url_for('main.tenant_payments'))
+            
+        if row[5] != 'COMPLETED':
+            flash("Receipt available only for completed payments.", "warning")
+            return redirect(url_for('main.tenant_payments'))
+
+        # Generate Receipt
+        receipt_data = {
+            'transaction_id': str(row[0]),
+            'amount': row[1],
+            'date': row[2],
+            'month': row[3],
+            'payment_mode': row[4],
+            'tenant_name': row[6],
+            'tenant_room': row[7],
+            'owner_name': row[8]
+        }
+        
+        pdf_buffer = generate_receipt(receipt_data)
+        
+        return send_file(
+            pdf_buffer,
+            mimetype='application/pdf',
+            as_attachment=True,
+            download_name=f"Receipt_{row[3]}.pdf"
+        )
+
+    except Exception as e:
+        print(f"Error generating receipt: {e}")
+        flash("Error generating receipt.", "error")
+        return redirect(url_for('main.tenant_payments'))
     finally:
         cur.close()
         conn.close()

@@ -15,7 +15,7 @@ DB_CONFIG = {
     "port": int(os.getenv("DB_PORT", "5432")),
 }
 
-SCHEMA_DIR = "database_schemas"
+SCHEMA_DIR = "app/database/migrations"
 
 def setup_db():
     print(" Starting Database Setup...")

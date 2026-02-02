@@ -102,6 +102,7 @@
                           <th class="p-5">Reference ID</th>
                           <th class="p-5 text-right">Amount</th>
                           <th class="p-5 text-center">Status</th>
+                          <th class="p-5 text-center">Receipt</th>
                       </tr>
                   </thead>
                   <tbody class="divide-y divide-gray-100">
@@ -126,6 +127,15 @@
                                     Failed
                                   {% endif %}
                               </span>
+                          </td>
+                          <td class="p-5 text-center">
+                              {% if payment.status == 'COMPLETED' %}
+                              <a href="{{ url_for('main.download_receipt', payment_id=payment.id) }}" class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-slate-100 text-slate-600 hover:bg-slate-200 hover:text-slate-900 transition-colors" title="Download Receipt">
+                                  <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
+                              </a>
+                              {% else %}
+                              <span class="text-slate-300">-</span>
+                              {% endif %}
                           </td>
                       </tr>
                       {% endfor %}
